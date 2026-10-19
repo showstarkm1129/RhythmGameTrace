@@ -25,16 +25,28 @@ def phase_of(txt):
     return 0
 
 
+def is_foreground(msg):
+    return 'behavior: foreground' in msg.split('subevents', 1)[0]
+
+
+def pick_token(tokens, foreground):
+    preferred = [(t, n) for t, n in tokens.most_common() if t in foreground]
+    return (preferred or tokens.most_common())[0][0]
+
+
 def load(path):
     """Return events, per-contact samples and viewer strokes for one JSONL capture.
 
     Times are integer ms from the first record. XY are stored doubled (x2) as in the viewer's STROKES.
-    Lines that are not oslog JSON are skipped. If the capture mixes several Digitizer tokens,
-    only the most frequent one is used (a single coordinate system).
+    Lines that are not oslog JSON are skipped. backboardd logs each touch once per Digitizer token: a raw one in
+    device pixels and one marked "behavior: foreground" in points (the stream the old capture command kept, e.g.
+    0xD8DEEB04; the token value changes between sessions). Only one token is used: the most frequent token that is
+    marked "behavior: foreground", or the most frequent token if none is marked.
     """
     recs = []
     skipped = 0
     tokens = collections.Counter()
+    foreground = set()
     with open(path, encoding='utf-8-sig') as f:
         for line in f:
             line = line.strip()
@@ -54,8 +66,10 @@ def load(path):
             tok = m.group(1) if m else None
             if tok:
                 tokens[tok] += 1
+                if is_foreground(msg):
+                    foreground.add(tok)
             recs.append((ts, msg, tok))
-    token = tokens.most_common(1)[0][0] if len(tokens) > 1 else None
+    token = pick_token(tokens, foreground) if len(tokens) > 1 else None
     if token:
         recs = [r for r in recs if r[2] == token]
     if not recs:

@@ -10,3 +10,7 @@ build/
 __pycache__/
 *.pyc
 .venv/
+
+# Touch recordings made from the viewer (launch_viewer.py); copy the ones worth keeping into data/
+data/captures/
+viewer/captures/

@@ -4,8 +4,8 @@
     {
       "name": "viewer",
       "runtimeExecutable": "py",
-      "runtimeArgs": ["-m", "http.server", "8765", "--bind", "127.0.0.1", "--directory", "viewer"],
-      "port": 8765
+      "runtimeArgs": ["viewer/launch_viewer.py", "--port", "8767", "--no-browser"],
+      "port": 8767
     },
     {
       "name": "repo-root",

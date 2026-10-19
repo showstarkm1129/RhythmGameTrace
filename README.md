@@ -17,7 +17,22 @@
 
 ## 2. 最重要：実機で成功した取得経路
 
-### 取得コマンド（PowerShell）
+### ビューアからワンクリックで記録（推奨）
+
+`viewer/start_viewer.bat`（`launch_viewer.py`）で開いたビューアの「タッチを記録（iPad・USB）」パネルで **● 記録開始 / ■ 記録終了** を押すだけで、下の取得コマンドと同じ処理を行う。
+
+- 中身は `viewer/touch_oslog.py` を子プロセスで起動する。これは `pymobiledevice3 developer dvt oslog --format json` と同じコマンドを、**iPad側で絞り込む条件（NSPredicate）を付けて**実行するもの:
+  `subsystem == "com.apple.BackBoard" AND category == "TouchEvents" AND composedMessage BEGINSWITH "Digitizer token:" AND composedMessage CONTAINS "behavior: foreground"`。
+  素の `oslog` は **全プロセスのログ（debugレベル含む）** を受け取り、`--pid` はPC側でPythonが1行ずつ解読した後に適用される（`ActivityTraceTap` の `targetPID: -3` = all）。触っていない状態でも約160行/秒あり、プレイ中は解読が追いつかず、2026-10-19の実測では1分のプレイが届くまで約6分かかった。§4の「終盤の記録途切れ」も、Ctrl+C で未処理の分を捨てていた可能性が高い。条件は pymobiledevice3 の `ActivityTraceTap` の設定（`predicate`）を差し替えて渡している（`subsystem` / `category` / `composedMessage` がiPad側で効くことを確認済み）。`targetPID` の指定は効かなかった。
+  受け取った行は念のためPC側でも `Digitizer token:` と `behavior: foreground` を確認してから保存する。保存時は `timestamp` / `pid` / `subsystem` / `category` / `message` だけを残す（`format_string` と `arguments` は `message` の重複なので削り、サイズは約半分）。
+- 条件で絞るので `backboardd` のPIDは不要（取得していた `proclist` の約5秒も削減）。接続の確立（Python起動＋通常接続の失敗＋iOS 17+ の userspace tunnel）に10〜15秒かかるため、「記録中」の表示を待ってからプレイする。iPad側で絞ると触るまで1行も届かないので、`touch_oslog.py` はストリームを開いた時点で標準エラーに `TOUCH_OSLOG_READY` を出し、それを「記録中」の合図にしている。
+- backboardd は1回のタッチを**2つのトークンで二重に出力する**（2026-10-19の実機確認: `0xE2FCCABB` は生のピクセル座標＝ポイントの2倍で `behavior` なし、`0xFBB79748` は `sgp; behavior: foreground` 付きのポイント座標）。従来コマンドの `0xD8DEEB04` は後者に当たるが、**トークン値はセッションごとに変わる**ので、値ではなく `behavior: foreground` で絞り込む。それでも画面表示用のトークンが複数混ざった場合は記録中に警告を出す。
+- 終了時は、ログの到着遅れと「接触中に止めると up を取り逃がす」問題に備えて、最低1.5秒、指が全部離れてから1秒経つまで（最大6秒）読み続けてから保存する。
+- 保存先は `data/captures/touch_YYYYMMDD_HHMMSS.jsonl`（git管理外。残したい記録は `data/` にコピー）。タッチが1件もなければファイルを作らない。保存後はビューアに自動で読み込まれ、パネルの一覧から過去の記録も開ける。
+- 記録中にブラウザのタブを閉じても記録は続く（サーバー側で動いている）。開き直すと状態を表示する。`start_viewer.bat` の黒い画面を閉じるとサーバーごと止まる。
+- API（`/api/capture/*`）は `127.0.0.1` のみで待ち受け、ビューア以外のページからの呼び出しは拒否する。
+
+### 取得コマンド（PowerShell・手動で取る場合）
 
 ```powershell
 py -m pymobiledevice3 developer dvt oslog --pid 70 --format json |
@@ -94,9 +109,12 @@ ArcaeaCodexHandoff/
   viewer/
     arcaea_touch_video_sync.html  <- 主アプリ・タッチ埋め込み済み単一HTML
     start_viewer.bat              <- Windows起動用
-    launch_viewer.py              <- localhost HTTPサーバー（既定127.0.0.1:8765）
+    launch_viewer.py              <- localhost サーバー（既定127.0.0.1:8765）+ USB記録API
+    touch_oslog.py                <- 記録用ワーカー（iPad側で絞り込んだ oslog）
     使い方.txt
   source/
+    launch_viewer.py              <- ローカルサーバー兼USB記録（viewer/ へそのままコピーされる）
+    touch_oslog.py                <- 記録用ワーカー（同上）
     touchlog.py                   <- JSONLパーサ（共通）。ビューア内ローダー parseTouchLog() と同じ規則
     viewer_template.html          <- ビューアのテンプレート（HTML/CSS/JSを直接編集する場所）
     analyze_touches.py            <- 実ログの統計解析（既定 data/touch_compact.jsonl、引数で別ファイル）
@@ -104,6 +122,7 @@ ArcaeaCodexHandoff/
     build_video_sync.py           <- JSONL + テンプレート -> viewer/ の動画比較HTML一式 + build/ のZIP
   build/                          <- 生成物（単体再生HTML・ZIP。git管理外）
   data/
+    captures/                     <- ビューアから記録したJSONL（git管理外）
     touch_compact.jsonl           <- 実プレイの一次ログ。最重要。
     cataclysm_touch_samples.csv  <- 1座標サンプル1行
     cataclysm_touch_contacts.csv <- 1接触ID1行の要約
@@ -123,7 +142,10 @@ ArcaeaCodexHandoff/
 - タイムライン: シークバーと同じ時間軸に、タッチ開始の密度・動画の範囲・基準点（T/V）・現在位置を表示。表示幅（全体/30秒/10秒/2秒）を切り替えでき、30秒以下では接触開始を1本ずつ描く。クリック/ドラッグで移動。
 - 動画の指定はローカルファイル(MP4等) またはYouTubeのURL/ID。YouTube「検索」は検索結果を別タブ表示→URL貼り付け方式。埋め込み失敗事例あり。**ローカルに保存済みの動画ファイルでは実際に重ね合わせ再生成功**。
 - ローカル動画は `<video>` + `URL.createObjectURL()` で読み込む。YouTubeはiframe API。HTML単体のほか `start_viewer.bat` でローカルHTTPサーバーを起動。
-- 時間同期は「動画基準点」と「タッチ基準点」を1組指定してオフセットを確定、±1/10/100msなどで微調整、同期設定JSON保存復元。どちらの基準点を先に設定してもよく、設定時に自動で「切り離し」状態（動画とタッチを別々に操作）になる。「連動に戻す」でオフセットを保ったまま再連動。
+- 時間同期の基本は映像のすぐ下の「同期」バー: ①動画を最初のノーツを叩く瞬間で止めて「ここが譜面の開始」（任意で最後のノーツを「譜面の終了」）→ ②開始タップの候補をクリック。止めている間は、候補のタップ位置が映像上に番号（★=最有力）で出る（このとき通常のタッチ表示は隠す）。候補は同時に始まったタップ（30ms以内）を1つにまとめた「onset」で、`log(1+前の空き秒) × その後のタップの割合 × log(1+続くonset数)` の順に並ぶ。「続く」は10秒以内で、1.5秒以上の空きが来るまでの数（リトライ等のメニュー操作は読み込みの空きで切れるので上位に来ない）。
+- **iPadの画面録画なら録画時刻で推定**: 動画の開始時刻（ファイル名 `ScreenRecording_MM-DD-YYYY HH-MM-SS` / `RPReplay_Final<unix>`、無ければMP4の `mvhd` 作成日時をPCのタイムゾーンで換算）と、タッチログ最初の行の時刻（`startedAt`、同じiPadの時計）の差を推定オフセットとして表示し「この推定で合わせる」で当てはめられる。候補には「時刻差」（推定と比べて何秒ずれるか）を出し、0.6秒以内を大きく上げる。ログと動画の時間が重ならないとき（別端末で撮った譜面動画など）は使わない。2026-10-19の実測（`ScreenRecording_10-19-2026 20-39-04_1.mp4` × `touch_20261019_203946.jsonl`、冒頭にリトライ前のプレイあり）では、推定 −56.775s に対し実際は −56.516s（差0.26s）で、★が正しい最初のタップ（2本同時）になった。終了も決めると、`候補 + (終了−開始)` に最も近い「後ろに1.5秒以上の空きがあるタップ」（=最後のノーツ候補）とのずれを出し、ずれが小さいほど上げる。候補をクリックするとその開始が譜面の開始に来るようにオフセットを設定して開始の瞬間を表示し、候補のタップ位置にピンクの点線の輪を出す。「確認再生」は開始の1秒前から約4秒再生、「元に戻す」は候補を試す前のオフセットに戻す。（旧版の検証）2026-10-19の埋め込みデータ（README記載の動画6.301秒 ≒ タッチ7.737秒）では、開始だけでも、終了つき（終了が0.25秒ずれていても）でも 7.737秒の2本同時タップが1位になることを確認。
+- 「全タップの一覧から直接選ぶ」（折りたたみ内）: 動画を合わせたい瞬間で止め、一覧から対応するタップを選んで「選択したタップの開始 ＝ 今の動画時刻 にする」を押すと、`offset = タップ開始 − 動画時刻` で一発で合う（タップを先に選んでから動画を動かしてもよい）。一覧には前のタップからの間隔を出し、1.5秒以上空いたものを強調（曲の開始やメニュー操作の切れ目の目安）。「次の空き ⏭」でその位置へ飛べる。選択中のタップは映像上に開始位置の点線の輪（開始1秒前から「あと◯秒」）、タイムラインにピンクの印で出る。
+- 従来の方法として、「動画基準点」と「タッチ基準点」を1組指定してオフセットを確定することもできる（折りたたみ内）。±1/10/100msなどで微調整、同期設定JSON保存復元。どちらの基準点を先に設定してもよく、設定時に自動で「切り離し」状態（動画とタッチを別々に操作）になる。「連動に戻す」でオフセットを保ったまま再連動。
 - 連動中でも、動画の範囲外（曲前のタップや動画終了後）のタッチをシークで表示できる。範囲外から再生すると、タッチだけ進んで動画の範囲に入った時点で動画も再生される。
 - 現在の対応式は **`touchTimeMs = videoTimeMs + offsetMs`**。録画で見えた例: 動画6.301秒 ≒ タッチ7.737秒 ⇒ `offsetMs ≒ +1436`（未精密調整）。
 - **画面canvas固定解像度 `1194×834`**。動画は `object-fit: contain` で表示される。「iPad画面を動画の映像範囲に自動で合わせる」（既定ON）で、iPad座標系を動画の黒帯を除いた映像範囲に写す（YouTubeは16:9と仮定）。その上に倍率（25〜200%、0.1%刻み）/ずれ（px）の手動補正を数値入力または「✥ 位置合わせ」モード（ドラッグ・ホイール・矢印キー）で重ねる。自動合わせの項目がない古い設定JSON/保存状態は、互換のため自動合わせOFFとして読む。
@@ -135,14 +157,14 @@ ArcaeaCodexHandoff/
 ```powershell
 # viewer/ 内で
 .\start_viewer.bat
-# または Python を使って
+# または Python を使って（--port 番号 / --no-browser も指定可）
 py launch_viewer.py
-# 既定: http://127.0.0.1:8765/arcaea_touch_video_sync.html
+# 既定: http://127.0.0.1:8765/arcaea_touch_video_sync.html（使用中なら空きポートで開く）
 ```
 
 ### 再ビルド
 
-`viewer/` 内の4ファイル（HTML / `launch_viewer.py` / `start_viewer.bat` / `使い方.txt`）は生成物。手で編集せず、ビューアは `source/viewer_template.html`、付属ファイルは `source/build_video_sync.py` を修正して再生成する。パスはスクリプト位置からの相対なので、カレントディレクトリはどこでもよい。2つのスクリプトは独立しており、`build_video_sync.py` は標準ライブラリだけで動く。PNG出力のみ `matplotlib` が必要（無ければPNGだけ省略）。
+`viewer/` 内の5ファイル（HTML / `launch_viewer.py` / `touch_oslog.py` / `start_viewer.bat` / `使い方.txt`）は生成物。手で編集せず、ビューアは `source/viewer_template.html`、サーバーは `source/launch_viewer.py` と `source/touch_oslog.py`、それ以外の付属ファイルは `source/build_video_sync.py` を修正して再生成する。パスはスクリプト位置からの相対なので、カレントディレクトリはどこでもよい。2つのスクリプトは独立しており、`build_video_sync.py` は標準ライブラリだけで動く。PNG出力のみ `matplotlib` が必要（無ければPNGだけ省略）。
 
 ```powershell
 py source\build_video_sync.py     # viewer/* , build/arcaea_touch_video_sync.zip（既定データ: data/touch_compact.jsonl）
@@ -153,7 +175,7 @@ py source\build_touch_replay.py data\other_play.jsonl --prefix other --title "�
 ```
 
 - 出力は改行LF固定（`newline='\n'`）。CSV 2つは従来版とバイト一致を確認済み。PNGはmatplotlibのバージョン差でバイト列が変わるが、内容は同一。
-- 複数の Digitizer トークンが混ざったJSONLでは、最も多いトークンだけを使う（Python・ビューアとも）。JSONとして読めない行は数えて読み飛ばす。
+- 複数の Digitizer トークンが混ざったJSONLでは1つのトークンだけを使う（Python・ビューアとも）。`behavior: foreground` の付いたトークンを優先し、その中で最も多いもの。付いたものが無ければ最も多いもの。JSONとして読めない行は数えて読み飛ばす。
 - 動画ファイル（`*.mp4` 等）と `build/` は `.gitignore` 対象。
 
 ## 6. 既知の課題・未検証事項（優先順位はCodexとユーザーで決める）

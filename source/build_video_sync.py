@@ -10,32 +10,14 @@ ap.add_argument('jsonl',nargs='?',type=Path,default=ROOT/'data'/'touch_compact.j
 ap.add_argument('--title',default='Cataclysm Cry (INS)',help='display name of the embedded data')
 args=ap.parse_args()
 log=touchlog.load(args.jsonl)
-embedded={'name':args.title,'source':args.jsonl.name,'duration':log['duration'],'strokes':log['strokes'],
+embedded={'name':args.title,'source':args.jsonl.name,'startedAt':log['zero'].isoformat(),'duration':log['duration'],'strokes':log['strokes'],
           'info':{'records':log['records'],'skipped':log['skipped'],'token':log['token']}}
 # '<\/' keeps a name containing "</script>" from closing the script block
 html=(SOURCE/'viewer_template.html').read_text('utf-8').replace('__TOUCH_DATA__',json.dumps(embedded,ensure_ascii=False,separators=(',',':')).replace('</','<\\/'))
 out=VIEWER/'arcaea_touch_video_sync.html';out.write_text(html,encoding='utf8',newline='\n')
-# Windows local launcher: start HTTP server first, then open browser (avoids a startup race)
-launch_script='''from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
-from pathlib import Path
-import os, webbrowser
-os.chdir(Path(__file__).resolve().parent)
-try:
-    server=ThreadingHTTPServer(('127.0.0.1',8765),SimpleHTTPRequestHandler)
-except OSError:
-    server=ThreadingHTTPServer(('127.0.0.1',0),SimpleHTTPRequestHandler)
-url=f'http://127.0.0.1:{server.server_port}/arcaea_touch_video_sync.html'
-print('Arcaea Touch Studio: '+url,flush=True)
-print('Press Ctrl+C to close the server.',flush=True)
-webbrowser.open(url)
-try:
-    server.serve_forever()
-except KeyboardInterrupt:
-    pass
-finally:
-    server.server_close()
-'''
-(VIEWER/'launch_viewer.py').write_text(launch_script,encoding='utf-8',newline='\n')
+# Local server (viewer + USB recorder) and its capture worker are maintained as real files; copy them byte for byte
+for name in ['launch_viewer.py','touch_oslog.py']:
+    (VIEWER/name).write_bytes((SOURCE/name).read_bytes())
 launcher='''@echo off
 setlocal
 cd /d "%~dp0"
@@ -49,12 +31,22 @@ if errorlevel 1 pause
 (VIEWER/'start_viewer.bat').write_text(launcher,encoding='ascii',newline='\n')
 readme='''Arcaea Touch Studio — 使い方
 
-1. start_viewer.bat をダブルクリック。
+1. start_viewer.bat をダブルクリック（黒い画面は閉じずに置いておく）。
+
+■ iPadのタッチを記録する（USB接続・デベロッパモード有効のiPad）
+  a. 右上の「タッチを記録（iPad・USB）」で接続中のiPadが表示されているか確認。
+  b. 「● 記録開始」を押し、表示が「■ 記録終了」（記録中）に変わるまで待つ（10〜15秒ほど）。
+  c. プレイする。終わったら指を離して「■ 記録終了」。数秒後に保存され、自動でビューアに読み込まれる。
+  保存先: data/captures/（単体フォルダで使う場合は captures/）。過去の記録はパネルの一覧から開ける。
+
+■ 動画と重ねる
 2. ブラウザが開いたら、譜面動画ファイル（MP4など）を画面にドラッグ＆ドロップするか、右側の「ローカル動画」で選択。
    YouTubeを使う場合は「YouTube」タブでURLを貼り付けて「読込」。
    別のプレイのタッチログ（.jsonl）も、画面へのドロップか「0. タッチデータ」→「JSONLを開く」で読み込める。
-3. 動画とタッチの対応する瞬間を探して、それぞれ「基準点を設定」→「基準点を一致させる」（どちらが先でもOK）。
-   タッチ側はタイムライン（表示幅を10秒/2秒にすると1本ずつ見える）や「開始 ⏭」で探すと早い。
+3. 映像のすぐ下の「同期」バーで、動画を最初のノーツを叩く瞬間で止めて「ここが譜面の開始」（最後のノーツで「譜面の終了」も押すとより確実）。
+   止めている間は、開始タップの候補が映像の上に番号（★が最有力）で出る。最初のノーツに重なっている番号の候補をクリック。
+   「確認再生」で数秒流して確かめる。違えば「次の候補」。
+   iPadの画面録画なら、録画時刻から推定したオフセットも出る（「この推定で合わせる」で1秒以内まで合う）。
 4. ±1ms / 10ms / 100ms などで微調整。
 5. オフセットや表示調整はブラウザに自動保存され、次に開いたときに復元される。
    ローカル動画だけは自動で開けないので、前回と同じファイルを選び直す。
@@ -71,6 +63,6 @@ YouTube APIの制約で、APIキーなしの検索結果をアプリ内に直接
 BUILD.mkdir(exist_ok=True)
 zipout=BUILD/'arcaea_touch_video_sync.zip'
 with zipfile.ZipFile(zipout,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
- for name in ['arcaea_touch_video_sync.html','start_viewer.bat','launch_viewer.py','使い方.txt']:
+ for name in ['arcaea_touch_video_sync.html','start_viewer.bat','launch_viewer.py','touch_oslog.py','使い方.txt']:
   z.write(VIEWER/name,arcname=name)
 print({x.name:x.stat().st_size for x in [out,zipout,VIEWER/'start_viewer.bat']})
