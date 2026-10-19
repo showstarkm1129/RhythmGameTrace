@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arcaea Touch Studio</title>
+<!-- Template for viewer/arcaea_touch_video_sync.html. Edit this file, then run: py source/build_video_sync.py -->
+<style>
+:root{color-scheme:dark;--bg:#09101b;--pane:#142235;--pane2:#101c2c;--line:#2c4057;--text:#edf7ff;--sub:#9db1c4;--cyan:#64d5e9;--green:#71e3b0;--warn:#f9c976}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(155deg,#070e19,#101d2e);color:var(--text);font:14px system-ui,-apple-system,'Segoe UI',sans-serif}
+main{max-width:1510px;padding:19px 22px 54px;margin:auto}
+header{display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:14px}
+h1{font-size:25px;margin:0 0 5px;letter-spacing:-.02em}h1 span{font-size:14px;color:#75d6e9;font-weight:500}
+h2{font-size:16px;margin:0 0 11px}p{line-height:1.6;margin:5px 0;color:var(--sub)}
+.sub{color:var(--sub)}.small{font-size:12px}
+.chip{border:1px solid #3e6473;color:#a9f2f4;border-radius:100px;padding:6px 11px;font-size:12px;white-space:nowrap}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}
+.panel{border:1px solid var(--line);border-radius:13px;padding:15px;background:rgba(20,34,53,.95);margin-bottom:14px}
+.secondary{background:#101d2f}.stack{display:grid;gap:11px}
+.line{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+button,input,select{font:inherit}
+button,select,input[type=text],input[type=number],input[type=url]{background:#22364b;border:1px solid #456079;border-radius:7px;padding:8px 9px;color:var(--text);min-width:0}
+button{cursor:pointer;transition:background .15s}button:hover{background:#34526b}button:disabled{opacity:.45;cursor:not-allowed}
+.primary{background:#16718b;border-color:#40adca;font-weight:750}.primary:hover{background:#16839f}
+.quiet{background:#17283d}.full{width:100%}
+button.selected{background:#244d65;border-color:#69c3db;color:#e6ffff}
+.field{display:grid;gap:5px;min-width:0;flex:1}.field label,.label{font-size:12px;font-weight:600;color:#b7cddd}
+.inputline{display:flex;gap:6px}.inputline input{flex:1;width:100%}
+.hidden{display:none!important}
+
+/* Stage: sized so the playbar and seek bar stay on screen together with the video */
+.stage{width:min(100%,max(520px,calc((100vh - 300px)*1194/834)));margin:0 auto;aspect-ratio:1194/834;background:#060c17;border:1px solid #31465c;position:relative;overflow:hidden;border-radius:9px;isolation:isolate;cursor:pointer;touch-action:none}
+.stage.align{cursor:move}
+.stage.dragging{outline:3px dashed var(--cyan);outline-offset:-3px}
+.video-layer,.video-layer video,.video-layer>div{position:absolute;inset:0;width:100%;height:100%}
+.video-layer{z-index:1;background:#040810}.video-layer video{object-fit:contain}
+.video-layer #youtubeSlot>iframe{width:100%!important;height:100%!important;position:absolute;inset:0}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+.fallback{position:absolute;z-index:0;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#7d9bb3;letter-spacing:.03em;background:repeating-linear-gradient(90deg,#101b2e 0,#101b2e 25%,#15243a 25%,#15243a 50%)}
+.fallback div{font-size:21px;font-weight:700}
+.overlay-label{position:absolute;top:9px;left:10px;right:10px;width:max-content;max-width:calc(100% - 20px);background:#07121ed9;border:1px solid #2c475a;border-radius:6px;z-index:3;pointer-events:none;padding:5px 8px;color:#a7c7dc;font-size:11px}
+.overlay-label.unlinked{border-color:#997947;color:#ffe2a9}.overlay-label.align{border-color:#40adca;color:#bff4ff}
+.stage:fullscreen{width:100vw;height:100vh;max-width:none;aspect-ratio:auto;border:0;border-radius:0;background:#000}
+.stage:fullscreen>.video-layer,.stage:fullscreen>canvas,.stage:fullscreen>.fallback{inset:auto;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,calc(100vh*1194/834));height:min(100vh,calc(100vw*834/1194))}
+
+.playbar{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:10px}.playbar button{padding:8px 8px}.playbar .grow{flex:1}
+#playBtn{min-width:112px}.vol{width:70px;accent-color:#6cdbeb}
+.seek{width:100%;accent-color:#65d5e7;cursor:pointer;height:25px;margin:5px 0 0}
+.timelabel{display:flex;justify-content:space-between;color:#92abc1;font-size:11px}
+.timeline{display:block;width:100%;height:96px;border:1px solid #30455c;border-radius:7px;background:#101c2d;cursor:ew-resize;touch-action:none}
+.legend{display:inline-flex;align-items:center;gap:4px;margin-left:8px}.legend i{display:inline-block;width:12px;height:4px;border-radius:2px}
+.badges{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:10px 0}
+.metric{border:1px solid #2e425a;background:#17283d;border-radius:8px;padding:9px 10px;min-width:0}
+.metric label{display:block;color:#a1b5c8;font-size:11px;margin-bottom:5px}
+.metric strong{font-size:15px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+
+input[type=range]{accent-color:#6cdbeb}
+.range-row{display:flex;align-items:center;gap:8px}.range-row label{width:100px;flex-shrink:0;color:#b4c7d6;font-size:12px}
+.range-row input[type=range]{flex:1;min-width:50px}
+.range-row input[type=number]{width:76px;flex:none;padding:4px 6px;font:12px ui-monospace,monospace;text-align:right}
+.range-row .unit{width:22px;color:#92abc1;font-size:11px}
+.tabs{display:flex;gap:6px;margin-bottom:10px}.tabs button{flex:1}
+.tip{border-left:3px solid #3e8ba9;padding-left:10px;color:#adc5d5;font-size:12px;line-height:1.6}
+.warn{color:#ffd68c}
+.status{padding:8px;border:1px solid #36506a;background:#12263b;border-radius:7px;font-size:12px;line-height:1.5;color:#c6deed;overflow-wrap:anywhere}
+.status.warning{border-color:#997947;color:#ffe2a9}.status.good{border-color:#357963;color:#a4efd3}
+.help{font-size:12px}
+.linkstate{font-size:12px;padding:4px 10px;border-radius:99px;border:1px solid #357963;color:#a4efd3;background:#12263b}
+.linkstate.unlinked{border-color:#997947;color:#ffe2a9}
+.steps{margin:4px 0 8px;padding-left:20px;color:#adc5d5;font-size:12px;line-height:1.65}
+.anchor-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.anchor{border:1px solid #35536b;border-radius:8px;padding:10px;background:#17283d;display:flex;flex-direction:column}
+.anchor strong{display:block;font-size:13px;margin-bottom:7px}
+.anchor .value{font:700 16px ui-monospace,monospace;color:#aaf1fc}
+.anchor>button{margin-top:8px;width:100%}
+.mini-row{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-top:7px}.mini-row button{padding:5px 2px;font-size:11px;white-space:nowrap}
+.offset{font:750 26px ui-monospace,Consolas,monospace;color:#9ff0e9;text-align:center;padding:5px 0}
+.step-row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}.step-row button{padding:7px 2px;font-size:11px;white-space:nowrap}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
+@media(max-width:1100px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.side .panel{margin:0}.side .wide{grid-column:1/-1}}
+@media(max-width:650px){main{padding:13px 9px 36px}h1{font-size:21px}.panel{padding:11px}.side{grid-template-columns:1fr}.side .wide{grid-column:auto}.badges{grid-template-columns:repeat(2,1fr)}.step-row{grid-template-columns:repeat(3,1fr)}.anchor-row{grid-template-columns:1fr}}
+</style></head><body><main>
+<header><div><h1>Arcaea Touch Studio <span id="titleSub"></span></h1><p>実測タッチデータ × 動画重ね合わせ × ミリ秒単位の時間同期</p></div><span class="chip" id="dataChip"></span></header>
+<div class="layout"><section>
+
+<div class="panel">
+<div class="between" style="margin-bottom:10px"><strong>映像とタッチの重ね合わせ</strong><div class="line"><label class="small sub"><input id="showGrid" type="checkbox"> 画面枠とグリッド</label><label class="small sub"><input id="showIds" type="checkbox" checked> ID表示</label><label class="small sub"><input id="showTouch" type="checkbox" checked> タッチ表示</label><button id="alignBtn" class="quiet" style="padding:5px 9px;font-size:12px" title="映像の上でドラッグ/ホイールしてタッチの位置を合わせる（A）">✥ 位置合わせ</button></div></div>
+<div class="stage" id="stage"><div class="fallback" id="fallback"><div>VIDEO + TOUCH<br><span style="font-size:12px;font-weight:400">クリックして動画ファイルを選択、またはここにドラッグ＆ドロップ</span></div></div><div class="video-layer hidden" id="videoLayer"><video id="localVideo" playsinline preload="metadata" class="hidden"></video><div id="youtubeSlot" class="hidden"></div></div><canvas id="touchCanvas" width="1194" height="834"></canvas><div class="overlay-label" id="stageLabel"></div></div>
+<div class="playbar"><button class="primary" id="playBtn" title="再生/一時停止（Space）">▶ 再生</button><button id="back1" title="100ms単位は ← / →">−1秒</button><button id="forward1">+1秒</button><button id="samplePrev" title="ひとつ前の記録時刻へ（Shift+←）">◀ 1記録</button><button id="sampleNext" title="次の記録時刻へ（Shift+→）">1記録 ▶</button><button id="startPrev" title="前のタッチ開始（down）へ（,）">⏮ 開始</button><button id="startNext" title="次のタッチ開始（down）へ（.）">開始 ⏭</button><label class="small">速度 <select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label><span class="grow"></span><button id="muteBtn" class="quiet" title="ミュート切替（M）">🔊</button><input id="volume" class="vol" type="range" min="0" max="100" value="100" aria-label="音量"><button id="fullscreenBtn" class="quiet" title="映像とタッチをまとめて全画面（F）">⛶ 全画面</button></div>
+<input class="seek" id="seek" type="range" min="0" max="1" step="1" value="0" aria-label="タッチ時刻を移動"><div class="timelabel"><span id="minLabel"></span><span>タッチ時刻（動画と連動中は動画もシーク）</span><span id="maxLabel"></span></div>
+<div class="between" style="margin:11px 0 6px"><span class="line"><strong style="font-size:12px">タイムライン</strong><span class="sub small">クリック/ドラッグで移動</span><span class="legend small sub"><i style="background:#4f9cbb"></i>タッチ開始の密度</span><span class="legend small sub"><i style="background:#2f6f86"></i>動画の範囲</span><span class="legend small sub"><i style="background:#64d5e9"></i>T基準</span><span class="legend small sub"><i style="background:#f9c976"></i>V基準</span></span><label class="small sub">表示幅 <select id="tlZoom" style="padding:4px 6px"><option value="all">全体</option><option value="30000">30秒</option><option value="10000">10秒</option><option value="2000">2秒</option></select></label></div>
+<canvas class="timeline" id="timeline"></canvas>
+<div class="badges"><div class="metric"><label>タッチ時刻</label><strong id="touchClock">00:00.000</strong></div><div class="metric"><label>動画時刻</label><strong id="videoClock">—</strong></div><div class="metric"><label>接触中の指</label><strong id="activeCount">0本</strong></div><div class="metric"><label>開始済みの接触</label><strong id="totalCount">0</strong></div></div>
+<div class="between"><span class="small sub">表示中の接触ID：<span id="touchIds">—</span></span><span class="small sub">座標：<span id="position">—</span></span></div>
+</div>
+
+<div class="panel secondary"><div class="between" style="margin-bottom:10px"><h2 style="margin:0">表示調整・位置合わせ</h2><label class="small sub"><input id="autoFit" type="checkbox" checked> iPad画面を動画の映像範囲（黒帯を除く）に自動で合わせる</label></div>
+<div class="stack" id="overlayRows"></div>
+<div class="between" style="margin-top:10px"><span class="small sub">細かい合わせ込みは「✥ 位置合わせ」：映像上をドラッグで移動、ホイールで拡大縮小（<kbd>Shift</kbd>で横だけ、<kbd>Alt</kbd>で縦だけ）、矢印キーで1px（<kbd>Shift</kbd>で10px）。</span><button id="resetOverlay">リセット</button></div></div>
+</section><aside class="side">
+
+<div class="panel"><h2>0. タッチデータ</h2><div class="stack">
+<div class="field"><label for="dataTitle">表示名</label><input id="dataTitle" type="text"></div>
+<div class="status" id="dataInfo"></div>
+<div class="two"><button id="openData">JSONLを開く</button><button id="resetData" class="quiet">埋め込みデータに戻す</button></div><input id="dataFile" type="file" class="hidden" accept=".jsonl,.json,.txt,.log">
+<p class="small" style="margin:0">取得コマンドで保存したJSONL（oslog --format json）をそのまま読める。画面にドラッグ＆ドロップしてもOK。読み込んだデータはこのブラウザに保存される。</p>
+<div class="status hidden" id="dataStatus"></div></div></div>
+
+<div class="panel"><h2>1. 動画を読み込む</h2><div class="tabs"><button id="tabLocal" class="selected">▣ ローカル動画</button><button id="tabYT">▶ YouTube</button></div>
+<div id="ytPanel" class="stack hidden"><div class="field"><label for="ytSearch">YouTubeで譜面を検索</label><div class="inputline"><input type="text" id="ytSearch" value="Arcaea Cataclysm Cry INS chart view" placeholder="譜面名など"><button id="searchYT">検索 ↗</button></div></div><p class="small">YouTubeの検索結果が新しいタブで開くよ。動画のURLをコピーして下に貼り付ければ、この画面の背景で再生できる。</p>
+<div class="field"><label for="ytUrl">YouTube動画のURL または動画ID</label><div class="inputline"><input type="text" id="ytUrl" value="https://www.youtube.com/watch?v=WzXKOxGYWBU" placeholder="https://youtu.be/..."><button id="loadYT" class="primary">読込</button></div></div><button id="pasteYT" class="full quiet">クリップボードのURLを貼り付けて読込</button><p class="small warn">YouTubeの検索結果をアプリ内に直接表示するには外部APIが必要。現バージョンは検索タブから選ぶ方式です。動画によっては埋め込みが禁止されている場合があります。</p></div>
+<div id="localPanel" class="stack"><label class="label" for="localFile">MP4 / WebMなどを選ぶ</label><input type="file" accept="video/*,.mp4,.mov,.webm,.m4v" id="localFile" style="width:100%"><p class="small">動画はサーバーへアップロードしません。ファイルを選択するか、画面のどこかにドラッグ＆ドロップしてね。</p><div class="status" id="localFileName">未選択</div></div>
+<div id="mediaStatus" class="status" style="margin-top:11px">動画未読込。ローカル動画ファイルを選ぶか、画面にドラッグ＆ドロップしてね。</div></div>
+
+<div class="panel wide"><h2>2. 時間同期</h2>
+<div class="between"><span class="linkstate" id="linkState">連動中</span><button id="linkToggle" class="quiet" style="padding:6px 10px;font-size:12px">切り離す</button></div>
+<ol class="steps"><li>動画を基準にしたい瞬間（例：最初のノーツを叩いた瞬間）に合わせて「動画の基準点を設定」</li><li>タッチ側だけを動かして（タイムライン・シークバー・「開始 ⏭」など）同じ瞬間に合わせ「タッチの基準点を設定」</li><li>「基準点を一致させる」</li></ol>
+<p class="small" style="margin-top:0">どちらを先に設定してもOK。設定ボタンを押すと自動で「切り離し」になり、もう一方だけを動かせる。</p>
+<div class="anchor-row"><div class="anchor"><strong>動画の基準点</strong><div class="value" id="videoAnchor">—</div><div class="mini-row"><button data-vstep="-1000">−1秒</button><button data-vstep="1000">+1秒</button><button data-vstep="-frame" title="動画だけを1コマ戻す">◀ 1コマ</button><button data-vstep="frame" title="動画だけを1コマ進める">1コマ ▶</button></div><button id="setVideoAnchor">現在の動画時刻を設定</button></div><div class="anchor"><strong>タッチの基準点</strong><div class="value" id="touchAnchor">—</div><div class="mini-row"><button id="anchorStartPrev">⏮ 前の開始</button><button id="anchorStartNext">次の開始 ⏭</button><button id="anchorSamplePrev">◀ 1記録</button><button id="anchorSampleNext">1記録 ▶</button></div><button id="setTouchAnchor">現在のタッチ時刻を設定</button></div></div>
+<button id="syncAnchors" class="primary full" style="margin-top:9px">基準点を一致させる</button>
+<div id="syncStatus" class="status hidden" style="margin-top:9px"></div>
+<p class="small" style="text-align:center;margin-top:10px">動画が0秒のときのタッチ時刻（同期オフセット）</p><div class="offset" id="offsetReadout">+00:00.000</div>
+<div class="field"><label for="offsetInput">オフセットを直接入力（ミリ秒）</label><div class="inputline"><input id="offsetInput" type="number" step="1" value="0"><button id="applyOffset">適用</button></div></div>
+<p class="small">タッチの表示が動画より早い／遅い場合は、この値を少しずつ動かして調整。</p>
+<div class="step-row"><button data-offset="-1000">−1秒</button><button data-offset="-100">−100ms</button><button data-offset="-10">−10ms</button><button data-offset="-1">−1ms</button><button data-offset="1">+1ms</button><button data-offset="10">+10ms</button></div><div class="step-row" style="margin-top:5px"><button data-offset="100">+100ms</button><button data-offset="1000">+1秒</button><button id="zeroOffset" style="grid-column:span 2">0へ戻す</button><button id="saveSettings" style="grid-column:span 2">設定を保存 ↓</button></div><button id="loadSettings" class="full quiet" style="margin-top:8px">設定JSONを読み込む</button><input id="settingsFile" type="file" class="hidden" accept="application/json,.json"><p class="tip">例えば動画の0:12.500がタッチログの0:03.000に対応するなら、動画の基準点を12.500秒、タッチの基準点を3.000秒にして同期。オフセットは <strong>−9500ms</strong> になる。</p></div>
+
+<div class="panel wide"><h2>使い方と注意</h2><p class="help">基本は動画を選んで ▶ 再生。指は映像の上に重なり、動画側の時計を基準に同期するよ。動画の範囲外（曲の前など）のタッチも、タイムラインやシークバーで移動すれば表示できる。</p><p class="help">ショートカット：<kbd>Space</kbd> 再生/一時停止、<kbd>←</kbd>/<kbd>→</kbd> 100ms移動、<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd> 1記録ずつ移動、<kbd>,</kbd>/<kbd>.</kbd> 前/次のタッチ開始、<kbd>[</kbd>/<kbd>]</kbd> オフセット±1ms、<kbd>{</kbd>/<kbd>}</kbd> ±10ms、<kbd>A</kbd> 位置合わせ、<kbd>F</kbd> 全画面、<kbd>M</kbd> ミュート。映像エリアのクリックでも再生/一時停止できる。</p><p class="help">オフセット・基準点・表示調整・再生位置・読み込んだタッチデータはこのブラウザに自動保存され、次に開いたときに復元される。ローカル動画はブラウザの制約で自動では開けないので、前回と同じファイルを選び直してね。</p><p class="tip">実測ログの時刻はOSによる記録時刻であり、センサーの真の接触時刻と完全に一致するとは限りません。またログに抜けのある区間は、前後の座標を無理に補間しません。</p><p class="small">YouTubeはネット接続が必要。ブラウザの <code>file://</code> 直開きでは埋め込みが失敗する場合があるので、付属の <code>start_viewer.bat</code> で起動するのがおすすめ。</p></div>
+</aside></div>
+</main>
+<script>
+const EMBEDDED=__TOUCH_DATA__;
+const WIDTH=1194,HEIGHT=834,doc=id=>document.getElementById(id);
+const stage=doc('touchCanvas'),ctx=stage.getContext('2d'),seek=doc('seek'),localVideo=doc('localVideo'),timeline=doc('timeline');
+// key: [default, min, max, step, unit, label]
+const OVERLAY={opacity:[90,0,100,1,'%','軌跡の不透明度'],trail:[550,0,3000,10,'ms','軌跡の長さ'],scaleX:[100,25,200,0.1,'%','横方向の倍率'],scaleY:[100,25,200,0.1,'%','縦方向の倍率'],shiftX:[0,-600,600,1,'px','横方向のずれ'],shiftY:[0,-420,420,1,'px','縦方向のずれ']};
+const OVERLAY_KEYS=Object.keys(OVERLAY),VIEW_KEYS=['showGrid','showIds','showTouch'],STORE_KEY='arcaeaTouchStudio.state.v1',DATA_KEY='arcaeaTouchStudio.data.v1';
+const ov=Object.fromEntries(OVERLAY_KEYS.map(k=>[k,OVERLAY[k][0]]));
+let data=null,mediaMode='none',youtubePlayer=null,youtubeReady=false,youtubePlayerState=-1,ytScriptRequested=false,ytPendingID=null;
+// linked: touch time follows the video (t = video + offset). outside: linked, but t maps before/after the video, so touches run on their own clock.
+let t=0,offsetMs=0,videoAnchorMs=null,touchAnchorMs=null,linked=true,outside=false,playing=false,baseT=0,baseClock=0,lastDraw=0,objectURL=null,seekDrag=false;
+let minTime=-2000,maxTime=2000,frameMs=1000/30,alignMode=false,autoFit=true,alignDrag=null,tlDrag=null,tlBox=[0,0,0];
+let localInfo=null,mismatchFrom=null,muted=false,currentTab='local',persistTimer=null,restoring=false,dragDepth=0;
+
+// ---------- helpers ----------
+function fmt(ms){let sign=ms<0?'−':'';ms=Math.abs(Math.round(ms));let mins=Math.floor(ms/60000),secs=Math.floor(ms%60000/1000),msec=ms%1000;return sign+String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0')+'.'+String(msec).padStart(3,'0')}
+function fmtOffset(ms){return (ms>=0?'+':'−')+fmt(Math.abs(ms))}
+function color(id){return `hsl(${((id*137.508)%360).toFixed(1)} 95% 68%)`}
+function upperIndex(points,ms){let l=0,h=points.length;while(l<h){const mid=(l+h)>>1;if(points[mid][0]<=ms)l=mid+1;else h=mid}return l}
+function lowerBound(a,v){let l=0,h=a.length;while(l<h){const m=(l+h)>>1;if(a[m]<v)l=m+1;else h=m}return l}
+function upperBound(a,v){let l=0,h=a.length;while(l<h){const m=(l+h)>>1;if(a[m]<=v)l=m+1;else h=m}return l}
+function niceStep(x){const p=Math.pow(10,Math.floor(Math.log10(Math.max(x,1e-6)))),m=x/p;return (m<=1?1:m<=2?2:m<=5?5:10)*p}
+function showMsg(id,message,kind=''){const el=doc(id);el.textContent=message;el.className='status'+(kind?' '+kind:'');el.classList.remove('hidden')}
+function setStatus(message,kind=''){showMsg('mediaStatus',message,kind)}
+function setSyncStatus(message,kind=''){showMsg('syncStatus',message,kind)}
+function setDataStatus(message,kind=''){showMsg('dataStatus',message,kind)}
+
+// ---------- touch data ----------
+// Same rules as source/touchlog.py (keep in sync): integer ms from the first record (round half to even, like Python's round), XY stored doubled.
+const SUB_RX=/path:\s*(\d+);\s*\{([\d.]+),\s*([\d.]+)\};\s*(.*?)touchID:\s*(0x[\da-fA-F]+)/g,TOKEN_RX=/Digitizer token:\s*(0x[\da-fA-F]+)/;
+function roundHalfEven(v){const r=Math.round(v);return r-v===0.5&&r%2!==0?r-1:r}
+function parseIsoMicros(s){const m=/^(\d{4})-(\d\d)-(\d\d)[T ](\d\d):(\d\d):(\d\d)(?:\.(\d{1,6}))?(Z|[+-]\d\d:?\d\d)?$/.exec(s.trim());if(!m)return null;let us=Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+m[6])*1000+Number((m[7]||'').padEnd(6,'0'));if(m[8]&&m[8]!=='Z'){const sign=m[8][0]==='-'?-1:1,d=m[8].slice(1).replace(':','');us-=sign*(+d.slice(0,2)*60+ +d.slice(2))*60e6}return us}
+function phaseOf(txt){return /\bup;/.test(txt)?3:/\bdown;/.test(txt)?1:txt.includes('range (out)')?4:txt.includes('move')?2:0}
+function parseTouchLog(text,fileName){
+  const recs=[],tokens=new Map();let skipped=0;
+  for(let line of text.split(/\r?\n/)){
+    line=line.replace(/^﻿/,'').trim();if(!line)continue;
+    let j;try{j=JSON.parse(line)}catch(e){skipped++;continue}
+    if(!j||typeof j.message!=='string'||typeof j.timestamp!=='string'){skipped++;continue}
+    const us=parseIsoMicros(j.timestamp);if(us===null){skipped++;continue}
+    const tok=TOKEN_RX.exec(j.message)?.[1]||null;if(tok)tokens.set(tok,(tokens.get(tok)||0)+1);
+    recs.push([us,j.message,tok]);
+  }
+  let token=null;if(tokens.size>1)token=[...tokens].sort((a,b)=>b[1]-a[1])[0][0];
+  const used=token?recs.filter(r=>r[2]===token):recs;
+  if(!used.length)throw Error('oslogのJSON行が見つかりません（--format json で保存したファイルか確認してね）');
+  const zero=used[0][0],perID=new Map();
+  for(const [us,msg] of used){
+    const ms=roundHalfEven((us-zero)/1e6*1000);
+    for(const m of msg.matchAll(SUB_RX)){const id=parseInt(m[5],16);if(!perID.has(id))perID.set(id,[]);perID.get(id).push([ms,roundHalfEven(2*parseFloat(m[2])),roundHalfEven(2*parseFloat(m[3])),phaseOf(m[4])])}
+  }
+  if(!perID.size)throw Error('タッチ座標（subevents）を含む行がありません');
+  const strokes=[...perID].map(([id,pts])=>[id,pts[0][0],pts[pts.length-1][0],pts]).sort((a,b)=>a[1]-b[1]);
+  return {name:fileName.replace(/\.[^.]+$/,''),source:fileName,duration:roundHalfEven((used[used.length-1][0]-zero)/1e6*1000),strokes,info:{records:used.length,skipped,token}};
+}
+function prepareDataset(d,embedded){
+  const strokes=d.strokes.slice().sort((a,b)=>a[1]-b[1]),starts=strokes.map(s=>s[1]),set=new Set();
+  for(const s of strokes)for(const p of s[3])set.add(p[0]);
+  const samples=[...set].sort((a,b)=>a-b),gaps=[];let sum=0,n=0;
+  for(let i=1;i<samples.length;i++)gaps.push(samples[i]-samples[i-1]);
+  // Typical sampling rate: mean of gaps near the median, so pauses and dropped samples don't skew it
+  const median=gaps.slice().sort((a,b)=>a-b)[gaps.length>>1]||0;
+  for(const g of gaps)if(g>0&&g<=median*1.5){sum+=g;n++}
+  return {name:d.name||'タッチデータ',source:d.source||'',duration:d.duration,strokes,starts,samples,hz:n?Math.round(1000/(sum/n)):null,info:d.info||null,embedded};
+}
+function setDataset(d,embedded){data=prepareDataset(d,embedded);doc('dataTitle').value=data.name;updateDataUI();updateLimits();t=Math.max(minTime,Math.min(maxTime,t))}
+function updateDataUI(){
+  const n=data.strokes.length.toLocaleString('ja-JP'),i=data.info;
+  doc('titleSub').textContent='/ '+data.name;document.title='Arcaea Touch Studio — '+data.name;
+  doc('dataChip').textContent=`${n} contacts`+(data.hz?` · 約${data.hz} Hz`:'')+' · マルチタッチ';
+  doc('dataInfo').textContent=`${data.source||'（ファイル名不明）'}${data.embedded?'（ビルド時に埋め込み）':''} · 接触 ${n}件 · ${(data.duration/1000).toFixed(1)}秒`+(i?` · 記録 ${i.records.toLocaleString('ja-JP')}行`+(i.skipped?` · 読めなかった行 ${i.skipped}`:'')+(i.token?` · 複数トークンのうち ${i.token} だけ使用`:''):'');
+  doc('resetData').disabled=data.embedded;
+}
+function afterDataChange(message){
+  pause();videoAnchorMs=touchAnchorMs=null;updateAnchorsUI();
+  if(mediaExists()&&!linked)relink();
+  setTouchTime(Math.max(0,Math.min(t,data.duration)));
+  if(mediaExists())setSyncStatus('タッチデータを切り替えたので、基準点を設定し直して同期を確認してね（オフセットは前の値のまま）。','warning');
+  setDataStatus(message,'good');persist();
+}
+async function loadDataFile(file){
+  try{
+    setDataStatus('読み込み中…');
+    const parsed=parseTouchLog(await file.text(),file.name);
+    let stored=true;try{localStorage.setItem(DATA_KEY,JSON.stringify(parsed))}catch(e){stored=false}
+    setDataset(parsed,false);
+    afterDataChange(`「${file.name}」を読み込みました（接触 ${parsed.strokes.length.toLocaleString('ja-JP')}件）。`+(stored?'':' 容量が大きいためブラウザには保存できませんでした。次回は選び直してね。'));
+  }catch(err){setDataStatus('タッチデータを読み込めません: '+err.message,'warning')}
+}
+doc('openData').onclick=()=>doc('dataFile').click();
+doc('dataFile').onchange=e=>{const f=e.target.files?.[0];if(f)loadDataFile(f);e.target.value=''};
+doc('resetData').onclick=()=>{try{localStorage.removeItem(DATA_KEY)}catch(e){}setDataset(EMBEDDED,true);afterDataChange('ビルド時に埋め込んだデータに戻しました。')};
+doc('dataTitle').addEventListener('change',e=>{const v=e.target.value.trim();if(v){data.name=v;updateDataUI();persist()}else e.target.value=data.name});
+
+// ---------- media ----------
+function getYtID(v){v=(v||'').trim();if(/^[a-zA-Z0-9_-]{11}$/.test(v))return v;try{const u=new URL(v);let h=u.hostname.replace(/^www\./,'');if(h==='youtu.be')return u.pathname.slice(1).split('/')[0].match(/^[\w-]{11}$/)?.[0];if(['youtube.com','m.youtube.com','youtube-nocookie.com','music.youtube.com'].includes(h)){const candidate=u.searchParams.get('v')||u.pathname.match(/\/(?:embed|shorts|live|v)\/([\w-]{11})/)?.[1];if(candidate&&/^[\w-]{11}$/.test(candidate))return candidate}}catch(e){}return null}
+function mediaNow(){if(mediaMode==='local'&&localVideo.readyState>0)return localVideo.currentTime*1000;if(mediaMode==='youtube'&&youtubeReady&&youtubePlayer&&typeof youtubePlayer.getCurrentTime==='function'){try{return Math.max(0,youtubePlayer.getCurrentTime()*1000)}catch(e){}}return null}
+function currentVideoDuration(){if(mediaMode==='local'&&Number.isFinite(localVideo.duration))return localVideo.duration*1000;if(mediaMode==='youtube'&&youtubeReady&&youtubePlayer){try{let d=youtubePlayer.getDuration();return d>0?d*1000:null}catch(e){}}return null}
+function mediaExists(){return mediaMode!=='none'}
+function mediaAspect(){if(mediaMode==='local'&&localVideo.videoWidth>0)return localVideo.videoWidth/localVideo.videoHeight;if(mediaMode==='youtube')return 16/9;return null}
+function updateLimits(){
+  const d=currentVideoDuration(),lo=Math.min(0,mediaExists()?offsetMs:0),hi=Math.max(data.duration,d!==null?offsetMs+d:0);
+  minTime=Math.floor((lo-2000)/1000)*1000;maxTime=Math.ceil((hi+2000)/1000)*1000;
+  seek.min=String(minTime);seek.max=String(maxTime);doc('minLabel').textContent=fmt(minTime);doc('maxLabel').textContent=fmt(maxTime);
+}
+function setOffset(v){
+  if(!Number.isFinite(v))return;offsetMs=Math.round(v);doc('offsetInput').value=String(offsetMs);doc('offsetReadout').textContent=fmtOffset(offsetMs);updateLimits();
+  if(mediaExists()&&linked){if(outside)setTouchTime(t);else{const now=mediaNow();if(now!==null)t=now+offsetMs}}
+  draw();persist();
+}
+function stopMedia(){if(mediaMode==='local')localVideo.pause();if(mediaMode==='youtube'&&youtubeReady&&youtubePlayer){try{youtubePlayer.pauseVideo()}catch(e){}}}
+function startVideo(){if(mediaMode==='local'){const p=localVideo.play();if(p&&p.catch)p.catch(e=>{setStatus('ローカル動画を再生できません: '+e.message,'warning');resumeMediaState()})}else if(mediaMode==='youtube'&&youtubeReady&&youtubePlayer){try{youtubePlayer.playVideo()}catch(e){setStatus('YouTubeを開始できません: '+e.message,'warning')}}}
+function cleanupMedia(){stopMedia();playing=false;linked=true;outside=false;if(objectURL){URL.revokeObjectURL(objectURL);objectURL=null}localVideo.pause();localVideo.removeAttribute('src');localVideo.load();if(youtubePlayer){try{youtubePlayer.destroy()}catch(e){}youtubePlayer=null}youtubeReady=false;youtubePlayerState=-1;doc('youtubeSlot').innerHTML='';doc('youtubeSlot').classList.add('hidden');localVideo.classList.add('hidden');mediaMode='none';updatePlayUI();doc('fallback').classList.remove('hidden');doc('videoLayer').classList.add('hidden');updateLinkUI()}
+function setSource(mode){cleanupMedia();mediaMode=mode;doc('fallback').classList.add('hidden');doc('videoLayer').classList.remove('hidden');updateLimits();updateLinkUI()}
+function setVideoTime(v){if(!mediaExists()||!Number.isFinite(v))return;v=Math.max(0,v);let max=currentVideoDuration();if(max!==null)v=Math.min(v,Math.max(0,max-30));if(mediaMode==='local'){if(localVideo.readyState>0)localVideo.currentTime=v/1000}else if(mediaMode==='youtube'&&youtubeReady&&youtubePlayer){try{youtubePlayer.seekTo(v/1000,true)}catch(e){}}}
+function setTouchTime(v,alsoSeek=true){
+  t=Math.max(minTime,Math.min(maxTime,Number(v)));if(!Number.isFinite(t))t=0;
+  if(mediaExists()&&linked&&alsoSeek){
+    const vt=t-offsetMs,d=currentVideoDuration();
+    if(vt<0||(d!==null&&vt>d)){if(!outside){outside=true;if(playing)stopMedia()}setVideoTime(vt<0?0:d)}
+    else{const was=outside;outside=false;setVideoTime(vt);if(playing&&was)startVideo()}
+    updateStageLabel();
+  }
+  if(playing&&(!mediaExists()||(linked&&outside))){baseT=t;baseClock=performance.now()}
+  draw();persist();
+}
+function play(){
+  if(!mediaExists()){if(t>=data.duration)t=0;playing=true;baseT=t;baseClock=performance.now()}
+  else if(mediaMode==='youtube'&&!(youtubeReady&&youtubePlayer)){setStatus('YouTubeプレイヤーの準備中、または埋め込み失敗。localhostから起動し、動画の埋め込み設定も確認してね。','warning');return}
+  else if(linked&&outside){playing=true;baseT=t;baseClock=performance.now()}
+  else{playing=true;startVideo()}
+  updatePlayUI();
+}
+function pause(){stopMedia();playing=false;updatePlayUI();persist()}
+function toggle(){playing?pause():play()}
+function updatePlayUI(){doc('playBtn').textContent=playing?'Ⅱ 一時停止':'▶ 再生'}
+// Video element/player events. While outside the video range the video is parked, so its pause must not stop touch playback.
+function resumeMediaState(){if(linked&&outside)return;if(mediaMode==='local')playing=!localVideo.paused&&!localVideo.ended;else if(mediaMode==='youtube')playing=youtubePlayerState===1;updatePlayUI()}
+function loadYouTube(){const id=getYtID(doc('ytUrl').value);if(!id){setStatus('有効なYouTube動画URLまたは11文字の動画IDを入力してね。','warning');return}setSource('youtube');doc('youtubeSlot').classList.remove('hidden');ytPendingID=id;persist();setStatus('YouTubeプレイヤーを読み込んでいます…');if(window.YT&&window.YT.Player){createYt(id)}else if(!ytScriptRequested){ytScriptRequested=true;const script=document.createElement('script');script.src='https://www.youtube.com/iframe_api';script.onerror=()=>setStatus('YouTube APIスクリプトを読み込めません。ネット接続やブラウザの拡張機能を確認してね。','warning');document.head.appendChild(script)}}
+window.onYouTubeIframeAPIReady=()=>{if(mediaMode==='youtube'&&ytPendingID)createYt(ytPendingID)};
+function createYt(id){if(mediaMode!=='youtube')return;doc('youtubeSlot').innerHTML='<div id="ytIframe"></div>';let vars={playsinline:1,controls:1,rel:0,iv_load_policy:3,disablekb:0};if(location.protocol==='http:'||location.protocol==='https:')vars.origin=location.origin;frameMs=1000/30;
+  youtubePlayer=new YT.Player('ytIframe',{videoId:id,playerVars:vars,events:{onReady:()=>{youtubeReady=true;applyMediaPrefs();setStatus('YouTube動画を読み込みました。再生ボタンで同期表示を開始できます。','good');updateLimits();setTouchTime(t)},onStateChange:e=>{youtubePlayerState=e.data;resumeMediaState();updateLimits()},onError:e=>{setStatus(`このYouTube動画を埋め込めません（エラー ${e.data}）。動画の埋め込み禁止、または参照元制限の可能性があります。`,'warning')}}})}
+function fileLabel(info){return `${info.name} (${(info.size/1024/1024).toFixed(1)}MB)`}
+function loadLocal(file){if(!file)return;mismatchFrom=localInfo&&localInfo.name!==file.name?localInfo.name:null;setSource('local');objectURL=URL.createObjectURL(file);localVideo.classList.remove('hidden');localVideo.src=objectURL;localVideo.load();frameMs=1000/30;watchFrames();localInfo={name:file.name,size:file.size};doc('localFileName').textContent=fileLabel(localInfo);setStatus('ローカル動画の準備中…');persist()}
+localVideo.addEventListener('loadedmetadata',()=>{applyMediaPrefs();if(mismatchFrom)setStatus(`動画を読み込みました。ただし保存済みの同期設定は「${mismatchFrom}」用です。別の動画ならオフセットを確認してね。`,'warning');else setStatus('動画を読み込みました。データはPC内に保存されたままです。','good');mismatchFrom=null;updateLimits();setTouchTime(t)});
+localVideo.addEventListener('play',resumeMediaState);localVideo.addEventListener('pause',resumeMediaState);localVideo.addEventListener('ended',resumeMediaState);
+localVideo.addEventListener('error',()=>{if(mediaMode==='local'&&localVideo.getAttribute('src'))setStatus('動画ファイルを再生できません。ブラウザが対応するコーデック（H.264 MP4など）を使ってね。','warning')});
+// Learn the real frame duration while playing so the "1コマ" buttons step one video frame
+function watchFrames(){if(!('requestVideoFrameCallback' in localVideo))return;let last=null;const cb=(now,md)=>{if(last&&md.presentedFrames-last.frames===1){const d=(md.mediaTime-last.time)*1000;if(d>4&&d<frameMs-0.5)frameMs=d}last={frames:md.presentedFrames,time:md.mediaTime};if(mediaMode==='local')localVideo.requestVideoFrameCallback(cb)};localVideo.requestVideoFrameCallback(cb)}
+
+// ---------- sync (link / anchors) ----------
+function updateLinkUI(){
+  const media=mediaExists(),el=doc('linkState');
+  el.textContent=!media?'動画なし（タッチのみ）':linked?'連動中：タッチ = 動画 + オフセット':'切り離し中：動画とタッチを別々に操作';
+  el.classList.toggle('unlinked',media&&!linked);
+  doc('linkToggle').textContent=linked?'切り離す':'連動に戻す';doc('linkToggle').disabled=!media;
+  updateStageLabel();
+}
+function updateStageLabel(){
+  const el=doc('stageLabel');let text,cls='';
+  if(alignMode){text='位置合わせ中：ドラッグで移動 · ホイールで拡大縮小（Shift=横のみ / Alt=縦のみ）· Escで終了';cls='align'}
+  else if(!mediaExists())text='タッチのみ表示中 · 映像エリアをクリックすると動画を選べる';
+  else if(!linked){text='切り離し中：再生と「1コマ」は動画だけ、シークバー・タイムライン・「開始 ⏭」はタッチだけを動かす';cls='unlinked'}
+  else if(outside){text='動画の範囲外：タッチだけを表示中（動画の範囲に入ると動画も動き出す）';cls='unlinked'}
+  else text='指の位置は記録上の座標 · 映像との位置合わせは下の「表示調整・位置合わせ」から';
+  el.textContent=text;el.className='overlay-label'+(cls?' '+cls:'');
+}
+function unlink(){if(!mediaExists()||!linked)return;if(playing)pause();linked=false;outside=false;updateLinkUI();draw()}
+function relink(){linked=true;outside=false;const v=mediaNow();if(v!==null)t=v+offsetMs;updateLinkUI();draw();persist()}
+function updateAnchorsUI(){doc('videoAnchor').textContent=videoAnchorMs===null?'—':fmt(videoAnchorMs);doc('touchAnchor').textContent=touchAnchorMs===null?'—':fmt(touchAnchorMs);doc('syncAnchors').disabled=videoAnchorMs===null||touchAnchorMs===null}
+doc('linkToggle').onclick=()=>{if(linked){unlink();setSyncStatus('切り離しました。動画とタッチをそれぞれ合わせたい瞬間に移動してね。')}else{relink();setSyncStatus('連動に戻しました（オフセットはそのまま）。')}};
+doc('setVideoAnchor').onclick=()=>{
+  const v=mediaNow();if(v===null){setSyncStatus('先に動画を読み込んでね（1. 動画を読み込む）。','warning');return}
+  if(playing)pause();videoAnchorMs=Math.round(v);unlink();updateAnchorsUI();
+  setSyncStatus(touchAnchorMs===null?'動画の基準点を設定しました。次はタッチ側だけを動かして（タイムライン・「次の開始 ⏭」など）、同じ瞬間で「タッチの基準点を設定」を押してね。':'両方そろいました。「基準点を一致させる」を押してね。');persist();
+};
+doc('setTouchAnchor').onclick=()=>{
+  if(playing)pause();touchAnchorMs=Math.round(t);unlink();updateAnchorsUI();
+  setSyncStatus(videoAnchorMs!==null?'両方そろいました。「基準点を一致させる」を押してね。':mediaExists()?'タッチの基準点を設定しました。次は動画側だけを動かして（再生・「1コマ」など）、同じ瞬間で「動画の基準点を設定」を押してね。':'タッチの基準点を設定しました。動画を読み込んだら、同じ瞬間で「動画の基準点を設定」を押してね。');persist();
+};
+doc('syncAnchors').onclick=()=>{if(videoAnchorMs===null||touchAnchorMs===null){setSyncStatus('動画側とタッチ側、両方の基準点を先に設定してね。','warning');return}setOffset(touchAnchorMs-videoAnchorMs);relink();setSyncStatus(`同期しました（オフセット ${fmtOffset(offsetMs)}）。さらに±1msずつ微調整できます。`,'good')};
+document.querySelectorAll('[data-vstep]').forEach(b=>b.onclick=()=>{const v=mediaNow();if(v===null){setSyncStatus('先に動画を読み込んでね。','warning');return}const s=b.dataset.vstep,d=s==='frame'?frameMs:s==='-frame'?-frameMs:+s;if(playing)pause();if(linked)setTouchTime((outside?Math.max(0,t-offsetMs):v)+d+offsetMs);else{setVideoTime(v+d);draw()}});
+doc('applyOffset').onclick=()=>setOffset(+doc('offsetInput').value);doc('offsetInput').addEventListener('keydown',e=>{if(e.key==='Enter')setOffset(+e.target.value)});
+document.querySelectorAll('[data-offset]').forEach(b=>b.onclick=()=>setOffset(offsetMs+ +b.dataset.offset));doc('zeroOffset').onclick=()=>setOffset(0);
+
+// ---------- touch navigation ----------
+function stepSample(dir){const s=data.samples;let v;if(dir>0){const i=upperBound(s,t+0.01);v=i<s.length?s[i]:t+1000/120}else{const i=lowerBound(s,t-0.01)-1;v=i>=0?s[i]:t-1000/120}setTouchTime(v)}
+function jumpStart(dir){const s=data.starts,i=dir>0?upperBound(s,t+0.5):lowerBound(s,t-0.5)-1;if(i>=0&&i<s.length)setTouchTime(s[i])}
+doc('back1').onclick=()=>setTouchTime(t-1000);doc('forward1').onclick=()=>setTouchTime(t+1000);
+doc('samplePrev').onclick=doc('anchorSamplePrev').onclick=()=>stepSample(-1);doc('sampleNext').onclick=doc('anchorSampleNext').onclick=()=>stepSample(1);
+doc('startPrev').onclick=doc('anchorStartPrev').onclick=()=>jumpStart(-1);doc('startNext').onclick=doc('anchorStartNext').onclick=()=>jumpStart(1);
+seek.addEventListener('pointerdown',()=>{seekDrag=true});seek.addEventListener('input',()=>{seekDrag=true;setTouchTime(+seek.value,false)});
+function seekFinished(){if(seekDrag){seekDrag=false;setTouchTime(+seek.value,true)}}
+seek.addEventListener('change',seekFinished);seek.addEventListener('pointerup',seekFinished);seek.addEventListener('keyup',seekFinished);
+
+// ---------- timeline (same time axis as the seek bar) ----------
+function tlRange(){if(tlDrag)return tlDrag.range;const z=doc('tlZoom').value;if(z==='all')return [minTime,maxTime];const w=+z;return [t-w/2,t+w/2]}
+function fmtAxis(ms,step){const s=fmt(ms);return step>=1000?s.slice(0,-4):step>=100?s.slice(0,-2):s}
+function drawTimeline(){
+  const r=timeline.getBoundingClientRect(),dpr=window.devicePixelRatio||1;if(!r.width)return;
+  if(r.width!==tlBox[0]||r.height!==tlBox[1]||dpr!==tlBox[2]){timeline.width=Math.round(r.width*dpr);timeline.height=Math.round(r.height*dpr);tlBox=[r.width,r.height,dpr]}
+  const g=timeline.getContext('2d'),w=r.width,h=r.height;g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
+  const [a,b]=tlRange(),span=b-a,X=ms=>(ms-a)/span*w,axisY=h-15,stripY=axisY-8,top=4,base=stripY-3;
+  g.fillStyle='#152639';g.fillRect(X(0),top,X(data.duration)-X(0),base-top);
+  const vd=currentVideoDuration();
+  if(mediaExists()&&vd){g.fillStyle=linked?'#2f6f86':'#7a6338';g.fillRect(X(offsetMs),stripY,X(offsetMs+vd)-X(offsetMs),5)}
+  const bin=niceStep(span/150),starts=data.starts,counts=[];let max=1;
+  for(let s=Math.floor(a/bin)*bin;s<b;s+=bin){const c=lowerBound(starts,s+bin)-lowerBound(starts,s);counts.push([s,c]);if(c>max)max=c}
+  const zoomed=span<=30000;g.fillStyle='#4f9cbb';g.globalAlpha=zoomed?.35:1;
+  for(const [s,c] of counts){if(!c)continue;const x0=X(s),x1=X(s+bin),hh=(base-top)*c/max;g.fillRect(x0+.5,base-hh,Math.max(1,x1-x0-1),hh)}
+  g.globalAlpha=1;
+  if(zoomed){const i0=lowerBound(starts,a),i1=upperBound(starts,b);for(let i=i0;i<i1;i++){g.fillStyle=color(data.strokes[i][0]);g.fillRect(X(starts[i])-.75,top,1.5,base-top)}}
+  const mark=(ms,col,label,dy)=>{const x=X(ms);if(x<-5||x>w+5)return;g.strokeStyle=col;g.lineWidth=1.5;g.setLineDash([4,3]);g.beginPath();g.moveTo(x,top);g.lineTo(x,axisY);g.stroke();g.setLineDash([]);g.fillStyle=col;g.font='10px system-ui';g.fillText(label,x+3,top+10+dy)};
+  if(touchAnchorMs!==null)mark(touchAnchorMs,'#64d5e9','T基準',0);
+  if(videoAnchorMs!==null)mark(videoAnchorMs+offsetMs,'#f9c976','V基準',12);
+  const step=niceStep(span/7);g.fillStyle='#9db1c4';g.strokeStyle='#4a627a';g.lineWidth=1;g.font='10px system-ui';
+  for(let s=Math.ceil(a/step)*step;s<=b;s+=step){const x=X(s);g.beginPath();g.moveTo(x,axisY);g.lineTo(x,axisY+3);g.stroke();g.fillText(fmtAxis(s,step),x+2,h-2)}
+  const x=X(t);g.strokeStyle='#ffe19e';g.lineWidth=2;g.beginPath();g.moveTo(x,0);g.lineTo(x,axisY);g.stroke();
+}
+function tlScrub(e){const r=timeline.getBoundingClientRect(),[a,b]=tlDrag.range;setTouchTime(a+(e.clientX-r.left)/r.width*(b-a),false)}
+function tlEnd(){if(!tlDrag)return;tlDrag=null;seekDrag=false;setTouchTime(t,true)}
+timeline.addEventListener('pointerdown',e=>{try{timeline.setPointerCapture(e.pointerId)}catch(err){}tlDrag={range:tlRange()};seekDrag=true;tlScrub(e)});
+timeline.addEventListener('pointermove',e=>{if(tlDrag)tlScrub(e)});timeline.addEventListener('pointerup',tlEnd);timeline.addEventListener('pointercancel',tlEnd);
+doc('tlZoom').onchange=()=>{draw();persist()};
+
+// ---------- overlay geometry ----------
+// Where the iPad screen (WIDTH×HEIGHT logical units) lands on the canvas before manual scale/shift:
+// with autoFit, the visible picture of an object-fit:contain video (letterbox excluded); otherwise the whole stage.
+function baseRect(){const a=autoFit?mediaAspect():null;if(!a)return {x:0,y:0,w:WIDTH,h:HEIGHT};if(a>WIDTH/HEIGHT){const h=WIDTH/a;return {x:0,y:(HEIGHT-h)/2,w:WIDTH,h}}const w=HEIGHT*a;return {x:(WIDTH-w)/2,y:0,w,h:HEIGHT}}
+function makeMapper(){const r=baseRect(),cx=r.x+r.w/2,cy=r.y+r.h/2,kx=r.w/WIDTH*ov.scaleX/100,ky=r.h/HEIGHT*ov.scaleY/100;return (x,y)=>[cx+(x-WIDTH/2)*kx+ov.shiftX,cy+(y-HEIGHT/2)*ky+ov.shiftY]}
+function drawScreenFrame(map){
+  const [x0,y0]=map(0,0),[x1,y1]=map(WIDTH,HEIGHT);ctx.save();ctx.strokeStyle=alignMode?'#7fe7ff':'#f3fbff';ctx.globalAlpha=alignMode?.85:.4;ctx.lineWidth=alignMode?3:2;ctx.strokeRect(x0,y0,x1-x0,y1-y0);
+  ctx.globalAlpha=alignMode?.45:.26;ctx.lineWidth=1.5;ctx.beginPath();for(let i=1;i<4;i++){const x=x0+(x1-x0)*i/4,y=y0+(y1-y0)*i/4;ctx.moveTo(x,y0);ctx.lineTo(x,y1);ctx.moveTo(x0,y);ctx.lineTo(x1,y)}ctx.stroke();
+  if(alignMode){ctx.globalAlpha=.9;ctx.fillStyle='#7fe7ff';ctx.font='bold 14px ui-monospace,monospace';ctx.fillText('iPad (0,0)',x0+6,y0+18);ctx.fillText('(1194,834)',x1-98,y1-8)}ctx.restore();
+}
+function overlayDraw(){
+  ctx.clearRect(0,0,WIDTH,HEIGHT);
+  const map=makeMapper(),show=doc('showTouch').checked,showId=doc('showIds').checked,opacity=ov.opacity/100,trail=ov.trail,strokes=data.strokes,count=upperBound(data.starts,t);
+  if(doc('showGrid').checked||alignMode)drawScreenFrame(map);
+  let active=[],last=null;
+  if(show)for(let s=0;s<count;s++){
+    const [id,from,to,pts]=strokes[s];if(to<t-trail)continue;
+    let en=upperIndex(pts,t);if(!en)continue;let start=Math.max(0,upperIndex(pts,t-trail)-1),cc=color(id);
+    ctx.save();ctx.globalAlpha=opacity*.72;ctx.strokeStyle=cc;ctx.lineWidth=5.5;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();
+    let prev=null;for(let i=start;i<en;i++){let pp=map(pts[i][1]/2,pts[i][2]/2);if(!prev||pts[i][0]-pts[i-1]?.[0]>55)ctx.moveTo(...pp);else ctx.lineTo(...pp);prev=pp}
+    ctx.stroke();ctx.restore();
+    let current=pts[en-1],pos=map(current[1]/2,current[2]/2);
+    if(t>=from&&t<=to&&![3,4].includes(current[3])){active.push([id,pos,cc]);last=[current[1]/2,current[2]/2]}
+    else if(t>=to&&t-to<100&&[3,4].includes(current[3])){ctx.save();ctx.strokeStyle=cc;ctx.lineWidth=4;ctx.globalAlpha=opacity*(1-(t-to)/100);ctx.beginPath();ctx.arc(pos[0],pos[1],22,0,Math.PI*2);ctx.stroke();ctx.restore()}
+  }
+  for(let [id,pos,cc] of active){ctx.save();ctx.globalAlpha=opacity;ctx.shadowBlur=19;ctx.shadowColor=cc;ctx.fillStyle=cc;ctx.strokeStyle='#fff';ctx.lineWidth=2.7;ctx.beginPath();ctx.arc(pos[0],pos[1],13,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();if(showId){ctx.save();ctx.globalAlpha=opacity;ctx.fillStyle='#fff';ctx.font='bold 16px ui-monospace,monospace';ctx.shadowColor='#07121b';ctx.shadowBlur=5;ctx.fillText('0x'+id.toString(16).toUpperCase(),pos[0]+18,pos[1]-11);ctx.restore()}}
+  doc('activeCount').textContent=active.length+'本';doc('totalCount').textContent=count.toLocaleString('ja-JP')+' / '+strokes.length.toLocaleString('ja-JP');
+  doc('touchIds').textContent=active.length?active.map(a=>'0x'+a[0].toString(16).toUpperCase()).join(', '):'—';doc('position').textContent=last?last.map(n=>n.toFixed(1)).join(', '):'—';
+}
+function draw(){
+  doc('touchClock').textContent=fmt(t);const v=mediaNow();
+  doc('videoClock').textContent=v===null?'—':linked&&outside?fmt(t-offsetMs)+'（範囲外）':fmt(v);
+  if(!seekDrag)seek.value=String(Math.max(minTime,Math.min(maxTime,Math.round(t))));
+  overlayDraw();drawTimeline();
+}
+function frame(now){
+  if(!seekDrag){
+    const media=mediaExists();
+    if(playing&&(!media||(linked&&outside))){
+      t=baseT+(now-baseClock)*Number(doc('speed').value);
+      if(media){const vt=t-offsetMs,d=currentVideoDuration();if(vt>=0&&(d===null||vt<d)){outside=false;setVideoTime(vt);startVideo();updateStageLabel()}}
+      const end=media?maxTime:data.duration;if(t>=end&&(!media||outside)){t=end;pause()}
+    }else if(media&&linked&&!outside){const v=mediaNow();if(v!==null)t=v+offsetMs}
+  }
+  if(now-lastDraw>15){draw();lastDraw=now}requestAnimationFrame(frame);
+}
+
+// ---------- overlay controls ----------
+doc('overlayRows').innerHTML=OVERLAY_KEYS.map(k=>{const [def,min,max,step,unit,label]=OVERLAY[k];return `<div class="range-row"><label for="${k}">${label}</label><input id="${k}" type="range" min="${min}" max="${max}" step="${step}" value="${def}"><input id="${k}Num" type="number" min="${min}" max="${max}" step="${step}" value="${def}" aria-label="${label}（数値）"><span class="unit">${unit}</span></div>`}).join('');
+function setOverlay(k,v,keepNumField=false){const [,min,max,step]=OVERLAY[k];v=Number(v);if(!Number.isFinite(v))return;v=+(Math.round(Math.max(min,Math.min(max,v))/step)*step).toFixed(3);ov[k]=v;doc(k).value=v;if(!keepNumField)doc(k+'Num').value=v;draw();persist()}
+for(const k of OVERLAY_KEYS){
+  doc(k).addEventListener('input',()=>setOverlay(k,doc(k).value));
+  // While typing keep the field as typed; clamp and normalise when the edit is committed
+  doc(k+'Num').addEventListener('input',e=>{const v=+e.target.value,[,min,max]=OVERLAY[k];if(e.target.value!==''&&Number.isFinite(v)&&v>=min&&v<=max)setOverlay(k,v,true)});
+  doc(k+'Num').addEventListener('change',e=>setOverlay(k,e.target.value===''?ov[k]:e.target.value));
+}
+function setAutoFit(on){autoFit=on;doc('autoFit').checked=on;draw()}
+doc('autoFit').onchange=e=>{setAutoFit(e.target.checked);persist()};
+doc('resetOverlay').onclick=()=>{for(const k of OVERLAY_KEYS)setOverlay(k,OVERLAY[k][0]);setAutoFit(true);persist()};
+for(const k of VIEW_KEYS)doc(k).onchange=()=>{draw();persist()};
+function setAlignMode(on){alignMode=on;doc('stage').classList.toggle('align',on);doc('alignBtn').classList.toggle('selected',on);doc('alignBtn').textContent=on?'✓ 位置合わせ中':'✥ 位置合わせ';updateStageLabel();draw()}
+doc('alignBtn').onclick=()=>setAlignMode(!alignMode);
+doc('stage').addEventListener('pointerdown',e=>{if(!alignMode||e.button!==0)return;e.preventDefault();try{doc('stage').setPointerCapture(e.pointerId)}catch(err){}alignDrag={x:e.clientX,y:e.clientY,sx:ov.shiftX,sy:ov.shiftY,k:WIDTH/doc('touchCanvas').getBoundingClientRect().width}});
+doc('stage').addEventListener('pointermove',e=>{if(!alignDrag)return;setOverlay('shiftX',alignDrag.sx+(e.clientX-alignDrag.x)*alignDrag.k);setOverlay('shiftY',alignDrag.sy+(e.clientY-alignDrag.y)*alignDrag.k)});
+doc('stage').addEventListener('pointerup',()=>{alignDrag=null});doc('stage').addEventListener('pointercancel',()=>{alignDrag=null});
+doc('stage').addEventListener('wheel',e=>{if(!alignMode)return;e.preventDefault();const f=(e.deltaY||e.deltaX)<0?1.005:1/1.005;if(!e.altKey)setOverlay('scaleX',ov.scaleX*f);if(!e.shiftKey)setOverlay('scaleY',ov.scaleY*f)},{passive:false});
+
+// ---------- media panel, playbar ----------
+function selectTab(mode){currentTab=mode;persist();doc('tabYT').classList.toggle('selected',mode==='yt');doc('tabLocal').classList.toggle('selected',mode==='local');doc('ytPanel').classList.toggle('hidden',mode!=='yt');doc('localPanel').classList.toggle('hidden',mode!=='local')}
+doc('tabYT').onclick=()=>selectTab('yt');doc('tabLocal').onclick=()=>selectTab('local');
+doc('searchYT').onclick=()=>{let q=doc('ytSearch').value.trim();if(q)window.open('https://www.youtube.com/results?search_query='+encodeURIComponent(q),'_blank','noopener,noreferrer')};doc('ytSearch').addEventListener('keydown',e=>{if(e.key==='Enter')doc('searchYT').click()});
+doc('loadYT').onclick=loadYouTube;doc('ytUrl').addEventListener('keydown',e=>{if(e.key==='Enter')loadYouTube()});
+doc('pasteYT').onclick=async()=>{try{const s=await navigator.clipboard.readText();doc('ytUrl').value=s;loadYouTube()}catch(e){setStatus('クリップボードを読めません。URL欄に直接Ctrl+Vで貼り付けてね。','warning')}};
+doc('localFile').onchange=e=>loadLocal(e.target.files?.[0]);
+function isVideoFile(f){return f.type.startsWith('video/')||/\.(mp4|webm|mov|m4v)$/i.test(f.name)}
+// Accept drops anywhere: an unhandled drop would make the browser open the file and discard the session
+window.addEventListener('dragover',e=>{e.preventDefault();if(e.dataTransfer)e.dataTransfer.dropEffect='copy'});
+window.addEventListener('dragenter',e=>{if(e.dataTransfer?.types?.includes('Files')){dragDepth++;doc('stage').classList.add('dragging')}});
+window.addEventListener('dragleave',()=>{if(--dragDepth<=0){dragDepth=0;doc('stage').classList.remove('dragging')}});
+window.addEventListener('drop',e=>{
+  e.preventDefault();dragDepth=0;doc('stage').classList.remove('dragging');
+  const files=Array.from(e.dataTransfer?.files||[]),video=files.find(isVideoFile),log=files.find(f=>/\.(jsonl|log|txt)$/i.test(f.name)),json=files.find(f=>/\.json$/i.test(f.name));
+  if(video){selectTab('local');loadLocal(video)}if(log)loadDataFile(log);if(json)loadSettingsFile(json);
+  if(files.length&&!video&&!log&&!json)setStatus('動画ファイル（MP4/WebMなど）、タッチログ（.jsonl）、同期設定（.json）のどれかをドロップしてね。','warning');
+});
+doc('playBtn').onclick=toggle;
+function applyMediaPrefs(){const speed=+doc('speed').value,vol=+doc('volume').value/100;if(mediaMode==='local'){localVideo.playbackRate=speed;localVideo.volume=vol;localVideo.muted=muted}else if(mediaMode==='youtube'&&youtubeReady&&youtubePlayer){try{youtubePlayer.setPlaybackRate(speed);youtubePlayer.setVolume(vol*100);muted?youtubePlayer.mute():youtubePlayer.unMute()}catch(e){}}doc('muteBtn').textContent=muted||vol===0?'🔇':'🔊'}
+doc('muteBtn').onclick=()=>{muted=!muted;applyMediaPrefs();persist()};doc('volume').addEventListener('input',()=>{muted=false;applyMediaPrefs();persist()});
+doc('speed').onchange=()=>{applyMediaPrefs();if(playing&&(!mediaExists()||(linked&&outside))){baseT=t;baseClock=performance.now()}persist()};
+// Fullscreen the whole stage so the touch canvas stays on top of the video
+function toggleFullscreen(){if(document.fullscreenElement)document.exitFullscreen();else doc('stage').requestFullscreen?.().catch(e=>setStatus('全画面にできません: '+e.message,'warning'))}
+doc('fullscreenBtn').onclick=toggleFullscreen;document.addEventListener('fullscreenchange',()=>{doc('fullscreenBtn').textContent=document.fullscreenElement?'⛶ 全画面解除':'⛶ 全画面';draw()});
+doc('stage').addEventListener('click',e=>{if(alignMode||e.detail>1)return;if(!mediaExists()){selectTab('local');doc('localFile').click()}else toggle()});
+doc('stage').addEventListener('dblclick',()=>{if(mediaExists()&&!alignMode)toggleFullscreen()});
+
+// ---------- settings file + auto-save ----------
+function downloadData(name,obj){let blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000)}
+function settingsSnapshot(){return {version:1,source:mediaMode==='none'?(currentTab==='yt'?'youtube':'local'):mediaMode,videoURL:doc('ytUrl').value,localVideo:localInfo,touchData:data.source,offsetMs,videoAnchorMs,touchAnchorMs,autoFit,overlay:{...ov}}}
+function settingsFileName(){let base=localInfo?localInfo.name.replace(/\.[^.]+$/,''):getYtID(doc('ytUrl').value);base=(base||'settings').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,60);return `arcaea_touch_sync_${base}.json`}
+doc('saveSettings').onclick=()=>downloadData(settingsFileName(),settingsSnapshot());
+function applySettings(j){
+  if(j.version!==1)throw Error('保存形式が一致しません');
+  if(j.videoURL)doc('ytUrl').value=j.videoURL;videoAnchorMs=j.videoAnchorMs??null;touchAnchorMs=j.touchAnchorMs??null;updateAnchorsUI();
+  if(j.overlay)for(let [k,v] of Object.entries(j.overlay))if(OVERLAY_KEYS.includes(k)&&Number.isFinite(v))setOverlay(k,v);
+  // Files saved before auto-fit existed were tuned against the whole stage, so keep that mapping for them
+  setAutoFit(typeof j.autoFit==='boolean'?j.autoFit:false);
+  setOffset(j.offsetMs||0);if(j.source==='youtube')selectTab('yt');else if(j.source==='local')selectTab('local');
+  // A local file cannot be reopened by the page itself; remember its name so the user knows which one to pick
+  if(j.localVideo&&typeof j.localVideo.name==='string'){localInfo={name:j.localVideo.name,size:+j.localVideo.size||0};if(mediaMode!=='local')doc('localFileName').textContent='前回の動画: '+fileLabel(localInfo)+' — 同じファイルを選び直してね'}
+}
+async function loadSettingsFile(file){try{let j=JSON.parse(await file.text());applySettings(j);const other=j.touchData&&j.touchData!==data.source?` この設定はタッチデータ「${j.touchData}」用です。`:'';setStatus((j.localVideo?.name&&mediaMode!=='local'?`同期設定を復元しました。動画「${j.localVideo.name}」を選び直してね。`:'同期設定を復元しました。')+other,other?'warning':'good')}catch(err){setStatus('設定の読み込みに失敗: '+err.message,'warning')}}
+doc('loadSettings').onclick=()=>doc('settingsFile').click();doc('settingsFile').onchange=async e=>{let file=e.target.files?.[0];if(file)await loadSettingsFile(file);e.target.value=''};
+// Auto-save to this browser so a reload or restart does not lose the calibration
+function saveState(){clearTimeout(persistTimer);try{localStorage.setItem(STORE_KEY,JSON.stringify({...settingsSnapshot(),view:Object.fromEntries(VIEW_KEYS.map(k=>[k,doc(k).checked])),speed:doc('speed').value,volume:+doc('volume').value,muted,tlZoom:doc('tlZoom').value,dataTitle:data.name,t:Math.round(t)}))}catch(e){}}
+function persist(){if(restoring)return;clearTimeout(persistTimer);persistTimer=setTimeout(saveState,300)}
+function restoreState(){
+  let saved=null;try{saved=JSON.parse(localStorage.getItem(DATA_KEY)||'null')}catch(e){}
+  if(saved?.strokes?.length)setDataset(saved,false);else setDataset(EMBEDDED,true);
+  let j=null;try{j=JSON.parse(localStorage.getItem(STORE_KEY)||'null')}catch(e){}
+  if(!j||j.version!==1){setOffset(0);return}
+  restoring=true;
+  try{
+    applySettings(j);
+    if(typeof j.dataTitle==='string'&&j.dataTitle){data.name=j.dataTitle;doc('dataTitle').value=j.dataTitle;updateDataUI()}
+    for(const k of VIEW_KEYS)if(typeof j.view?.[k]==='boolean')doc(k).checked=j.view[k];
+    if([...doc('speed').options].some(o=>o.value===j.speed))doc('speed').value=j.speed;
+    if([...doc('tlZoom').options].some(o=>o.value===j.tlZoom))doc('tlZoom').value=j.tlZoom;
+    if(Number.isFinite(j.volume))doc('volume').value=j.volume;muted=!!j.muted;applyMediaPrefs();
+    if(Number.isFinite(j.t))setTouchTime(j.t,false);
+    setStatus('前回の作業状態を復元しました。'+(j.localVideo?.name?`動画「${j.localVideo.name}」を選び直してね。`:''),'good');
+  }catch(e){setOffset(0)}finally{restoring=false}
+}
+window.addEventListener('pagehide',saveState);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveState()});
+
+// ---------- keyboard ----------
+function isTyping(el){return !!el&&(el.isContentEditable||el.tagName==='TEXTAREA'||el.tagName==='SELECT'||(el.tagName==='INPUT'&&!['range','checkbox','radio','button'].includes(el.type)))}
+// Shortcuts stay active after clicking a button (Space must not re-press the focused button); other sliders keep their own arrow keys
+window.addEventListener('keydown',e=>{
+  const el=document.activeElement;if(isTyping(el)||e.ctrlKey||e.metaKey||e.altKey)return;const key=e.key;if(el?.type==='range'&&el!==seek&&key!==' ')return;
+  if(alignMode&&key.startsWith('Arrow')){e.preventDefault();const d=e.shiftKey?10:1;if(key==='ArrowLeft')setOverlay('shiftX',ov.shiftX-d);else if(key==='ArrowRight')setOverlay('shiftX',ov.shiftX+d);else if(key==='ArrowUp')setOverlay('shiftY',ov.shiftY-d);else setOverlay('shiftY',ov.shiftY+d);return}
+  if(key===' '){e.preventDefault();toggle()}
+  else if(key==='ArrowLeft'||key==='ArrowRight'){e.preventDefault();const dir=key==='ArrowLeft'?-1:1;if(e.shiftKey)stepSample(dir);else setTouchTime(t+dir*100)}
+  else if(key===','||key==='<')jumpStart(-1);else if(key==='.'||key==='>')jumpStart(1);
+  else if(key==='[')setOffset(offsetMs-1);else if(key===']')setOffset(offsetMs+1);else if(key==='{')setOffset(offsetMs-10);else if(key==='}')setOffset(offsetMs+10);
+  else if(key==='f'||key==='F')toggleFullscreen();else if(key==='m'||key==='M')doc('muteBtn').click();
+  else if(key==='a'||key==='A')setAlignMode(!alignMode);else if(key==='Escape'&&alignMode)setAlignMode(false);
+});
+
+window.addEventListener('resize',draw);
+restoreState();updateLinkUI();updateAnchorsUI();draw();requestAnimationFrame(frame);
+</script></body></html>

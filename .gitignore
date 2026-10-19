@@ -1,0 +1,12 @@
+# Large local videos (GitHub rejects files over 100MB)
+*.mp4
+*.mov
+*.m4v
+*.webm
+
+# Intermediate build output (source/build_*.py)
+build/
+
+__pycache__/
+*.pyc
+.venv/

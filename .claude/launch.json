@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "viewer",
+      "runtimeExecutable": "py",
+      "runtimeArgs": ["-m", "http.server", "8765", "--bind", "127.0.0.1", "--directory", "viewer"],
+      "port": 8765
+    },
+    {
+      "name": "repo-root",
+      "runtimeExecutable": "py",
+      "runtimeArgs": ["-m", "http.server", "8766", "--bind", "127.0.0.1"],
+      "port": 8766
+    }
+  ]
+}
