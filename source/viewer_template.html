@@ -29,7 +29,9 @@ button.selected{background:#244d65;border-color:#69c3db;color:#e6ffff}
 
 /* Stage: sized so the playbar and seek bar stay on screen together with the video */
 .stage{width:min(100%,max(520px,calc((100vh - 300px - var(--syncbar-h,0px))*1194/834)));margin:0 auto;aspect-ratio:1194/834;background:#060c17;border:1px solid #31465c;position:relative;overflow:hidden;border-radius:9px;isolation:isolate;cursor:pointer;touch-action:none}
-.stage.align{cursor:move}
+.stage.align{cursor:move}.stage.pick{cursor:crosshair}
+.hints{max-width:100%;background:#07121ed0;border:1px solid #2c475a;border-radius:7px;padding:5px 9px;color:#cfe3f0;font-size:11px;line-height:1.75;transition:opacity .3s}
+.hints.dim{opacity:0}.hints kbd{padding:0 4px;font-size:10px;border:1px solid #3a5268}.hints b{color:#ffe19e}
 .stage.dragging{outline:3px dashed var(--cyan);outline-offset:-3px}
 .video-layer,.video-layer video,.video-layer>div{position:absolute;inset:0;width:100%;height:100%}
 .video-layer{z-index:1;background:#040810}.video-layer video{object-fit:contain}
@@ -37,7 +39,8 @@ button.selected{background:#244d65;border-color:#69c3db;color:#e6ffff}
 .stage canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
 .fallback{position:absolute;z-index:0;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#7d9bb3;letter-spacing:.03em;background:repeating-linear-gradient(90deg,#101b2e 0,#101b2e 25%,#15243a 25%,#15243a 50%)}
 .fallback div{font-size:21px;font-weight:700}
-.overlay-label{position:absolute;top:9px;left:10px;right:10px;width:max-content;max-width:calc(100% - 20px);background:#07121ed9;border:1px solid #2c475a;border-radius:6px;z-index:3;pointer-events:none;padding:5px 8px;color:#a7c7dc;font-size:11px}
+.stage-top{position:absolute;top:9px;left:10px;right:10px;z-index:3;pointer-events:none;display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.overlay-label{max-width:100%;background:#07121ed9;border:1px solid #2c475a;border-radius:6px;padding:5px 8px;color:#a7c7dc;font-size:11px}
 .overlay-label.unlinked{border-color:#997947;color:#ffe2a9}.overlay-label.align{border-color:#40adca;color:#bff4ff}
 .stage:fullscreen{width:100vw;height:100vh;max-width:none;aspect-ratio:auto;border:0;border-radius:0;background:#000}
 .stage:fullscreen>.video-layer,.stage:fullscreen>canvas,.stage:fullscreen>.fallback{inset:auto;left:50%;top:50%;transform:translate(-50%,-50%);width:min(100vw,calc(100vh*1194/834));height:min(100vh,calc(100vw*834/1194))}
@@ -48,7 +51,7 @@ button.selected{background:#244d65;border-color:#69c3db;color:#e6ffff}
 .timelabel{display:flex;justify-content:space-between;color:#92abc1;font-size:11px}
 .timeline{display:block;width:100%;height:96px;border:1px solid #30455c;border-radius:7px;background:#101c2d;cursor:ew-resize;touch-action:none}
 .legend{display:inline-flex;align-items:center;gap:4px;margin-left:8px}.legend i{display:inline-block;width:12px;height:4px;border-radius:2px}
-.badges{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:10px 0}
+.badges{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin:10px 0}
 .metric{border:1px solid #2e425a;background:#17283d;border-radius:8px;padding:9px 10px;min-width:0}
 .metric label{display:block;color:#a1b5c8;font-size:11px;margin-bottom:5px}
 .metric strong{font-size:15px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
@@ -106,6 +109,10 @@ details.more{margin-top:12px;border-top:1px solid #2c4057;padding-top:8px}detail
 .rec-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.rec-stats div{border:1px solid #2e425a;background:#17283d;border-radius:7px;padding:6px 7px;min-width:0}
 .rec-stats label{display:block;color:#a1b5c8;font-size:10px;margin-bottom:2px}.rec-stats strong{font-size:13px;font-variant-numeric:tabular-nums}
 kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
+.opt-row{display:grid;grid-template-columns:118px 84px minmax(0,1fr);gap:8px;align-items:center}.opt-row+.opt-row{margin-top:8px}
+.opt-row label{font-size:12px;font-weight:650;color:#d9ecf7}.opt-row input{padding:5px 7px;font:12px ui-monospace,monospace;text-align:right;width:100%}.opt-row .small{margin:0;line-height:1.45}
+.sec-title{font-size:13px;font-weight:700;color:#d9f3ff;margin:14px 0 8px;border-top:1px solid #2c4057;padding-top:10px}
+.exp-bar{height:8px;border-radius:4px;background:#0f1c2b;border:1px solid #2c4057;overflow:hidden}.exp-bar div{height:100%;width:0;background:linear-gradient(90deg,#16718b,#71e3b0)}
 @media(max-width:1100px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.side .panel{margin:0}.side .wide{grid-column:1/-1}}
 @media(max-width:650px){main{padding:13px 9px 36px}h1{font-size:21px}.panel{padding:11px}.side{grid-template-columns:1fr}.side .wide{grid-column:auto}.badges{grid-template-columns:repeat(2,1fr)}.step-row{grid-template-columns:repeat(3,1fr)}.anchor-row{grid-template-columns:1fr}}
 </style></head><body><main>
@@ -113,21 +120,21 @@ kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
 <div class="layout"><section>
 
 <div class="panel">
-<div class="between" style="margin-bottom:10px"><strong>映像とタッチの重ね合わせ</strong><div class="line"><label class="small sub"><input id="showGrid" type="checkbox"> 画面枠とグリッド</label><label class="small sub"><input id="showIds" type="checkbox" checked> ID表示</label><label class="small sub"><input id="showTouch" type="checkbox" checked> タッチ表示</label><button id="alignBtn" class="quiet" style="padding:5px 9px;font-size:12px" title="映像の上でドラッグ/ホイールしてタッチの位置を合わせる（A）">✥ 位置合わせ</button></div></div>
-<div class="stage" id="stage"><div class="fallback" id="fallback"><div>VIDEO + TOUCH<br><span style="font-size:12px;font-weight:400">クリックして動画ファイルを選択、またはここにドラッグ＆ドロップ</span></div></div><div class="video-layer hidden" id="videoLayer"><video id="localVideo" playsinline preload="metadata" class="hidden"></video><div id="youtubeSlot" class="hidden"></div></div><canvas id="touchCanvas" width="1194" height="834"></canvas><div class="overlay-label" id="stageLabel"></div></div>
+<div class="between" style="margin-bottom:10px"><strong>映像とタッチの重ね合わせ</strong><div class="line"><label class="small sub"><input id="showGrid" type="checkbox"> 画面枠とグリッド</label><label class="small sub"><input id="showIds" type="checkbox" checked> ID表示</label><label class="small sub"><input id="showTouch" type="checkbox" checked> タッチ表示</label><label class="small sub" title="映像の左下に操作方法を出す（H）"><input id="showHints" type="checkbox" checked> 操作ヒント</label><button id="alignBtn" class="quiet" style="padding:5px 9px;font-size:12px" title="映像の上でドラッグ/ホイールしてタッチの位置を合わせる（A）">✥ 位置合わせ</button></div></div>
+<div class="stage" id="stage"><div class="fallback" id="fallback"><div>VIDEO + TOUCH<br><span style="font-size:12px;font-weight:400">クリックして動画ファイルを選択、またはここにドラッグ＆ドロップ</span></div></div><div class="video-layer hidden" id="videoLayer"><video id="localVideo" playsinline preload="metadata" class="hidden"></video><div id="youtubeSlot" class="hidden"></div></div><canvas id="touchCanvas" width="1194" height="834"></canvas><div class="stage-top"><div class="overlay-label" id="stageLabel"></div><div class="hints hidden" id="hints"></div></div></div>
 <div class="playbar"><button class="primary" id="playBtn" title="再生/一時停止（Space）">▶ 再生</button><button id="back1" title="100ms単位は ← / →">−1秒</button><button id="forward1">+1秒</button><button id="samplePrev" title="ひとつ前の記録時刻へ（Shift+←）">◀ 1記録</button><button id="sampleNext" title="次の記録時刻へ（Shift+→）">1記録 ▶</button><button id="startPrev" title="前のタッチ開始（down）へ（,）">⏮ 開始</button><button id="startNext" title="次のタッチ開始（down）へ（.）">開始 ⏭</button><label class="small">速度 <select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label><span class="grow"></span><button id="muteBtn" class="quiet" title="ミュート切替（M）">🔊</button><input id="volume" class="vol" type="range" min="0" max="100" value="100" aria-label="音量"><button id="fullscreenBtn" class="quiet" title="映像とタッチをまとめて全画面（F）">⛶ 全画面</button></div>
 <input class="seek" id="seek" type="range" min="0" max="1" step="1" value="0" aria-label="タッチ時刻を移動"><div class="timelabel"><span id="minLabel"></span><span>タッチ時刻（動画と連動中は動画もシーク）</span><span id="maxLabel"></span></div>
 <div class="syncbar" id="syncBar">
-<div class="syncbar-row"><span class="title">同期</span><span class="small sub">動画</span><span class="clock" id="syncVideoClock">—</span><button data-vstep="-1000">−1秒</button><button data-vstep="-frame" title="動画を1コマ戻す">◀ 1コマ</button><button data-vstep="frame" title="動画を1コマ進める">1コマ ▶</button><button data-vstep="1000">+1秒</button><button id="setChartStart" class="primary" title="今の動画時刻を、譜面の最初のノーツを叩く瞬間にする">ここが譜面の開始</button><button id="setChartEnd" title="今の動画時刻を、最後のノーツを叩く瞬間にする（任意）">譜面の終了</button><span class="small sub">開始 <b id="chartStartVal" class="clock">—</b> 終了 <b id="chartEndVal" class="clock">—</b></span><span class="grow" style="flex:1"></span><button id="syncBarToggle" class="quiet" title="同期バーをたたむ/開く">たたむ</button></div>
+<div class="syncbar-row"><span class="title">同期</span><span class="small sub">動画</span><span class="clock" id="syncVideoClock">—</span><button data-vstep="-1000">−1秒</button><button data-vstep="-frame" title="動画を1コマ戻す">◀ 1コマ</button><button data-vstep="frame" title="動画を1コマ進める">1コマ ▶</button><button data-vstep="1000">+1秒</button><button id="setChartStart" class="primary" title="今の動画時刻を、譜面の最初のノーツを叩く瞬間にする">ここが譜面の開始</button><button id="setChartEnd" title="今の動画時刻を、最後のノーツを叩く瞬間にする（任意）">譜面の終了</button><button id="pickBtn" title="映像に出るタッチを直接クリックして、そのタップを譜面の開始に合わせる（P）。候補がうまく出ないとき用">👆 タッチから開始を決める</button><span class="small sub">開始 <b id="chartStartVal" class="clock">—</b> 終了 <b id="chartEndVal" class="clock">—</b></span><span class="grow" style="flex:1"></span><button id="syncBarToggle" class="quiet" title="同期バーをたたむ/開く">たたむ</button></div>
 <div class="syncbar-row fold small"><span class="sub" id="candHint"></span></div>
 <div class="syncbar-row fold small est hidden" id="estRow"><span id="estText"></span><button id="applyEst">この推定で合わせる</button></div>
 <div class="cand-chips fold" id="candList"></div>
 <div class="syncbar-row fold"><button id="candPrev">◀ 前の候補</button><button id="candNext">次の候補 ▶</button><button id="candReplay" title="譜面の開始の1秒前から数秒再生して確かめる">▶ 確認再生</button><button id="candUndo" class="quiet">元に戻す</button><span class="grow" style="flex:1"></span><span class="small sub">オフセット</span><b class="clock" id="offsetMini">+00:00.000</b><button data-offset="-10">−10ms</button><button data-offset="-1">−1ms</button><button data-offset="1">+1ms</button><button data-offset="10">+10ms</button></div>
 <div id="syncStatus" class="status hidden fold" style="margin-top:6px"></div>
 </div>
-<div class="between" style="margin:11px 0 6px"><span class="line"><strong style="font-size:12px">タイムライン</strong><span class="sub small">クリック/ドラッグで移動</span><span class="legend small sub"><i style="background:#4f9cbb"></i>タッチ開始の密度</span><span class="legend small sub"><i style="background:#2f6f86"></i>動画の範囲</span><span class="legend small sub"><i style="background:#64d5e9"></i>T基準</span><span class="legend small sub"><i style="background:#f9c976"></i>V基準</span><span class="legend small sub"><i style="background:#ff7ad9"></i>選択タップ</span><span class="legend small sub"><i style="background:#9ff0c9"></i>譜面開始/終了</span></span><label class="small sub">表示幅 <select id="tlZoom" style="padding:4px 6px"><option value="all">全体</option><option value="30000">30秒</option><option value="10000">10秒</option><option value="2000">2秒</option></select></label></div>
+<div class="between" style="margin:11px 0 6px"><span class="line"><strong style="font-size:12px">タイムライン</strong><span class="sub small">クリック/ドラッグで移動</span><span class="legend small sub"><i style="background:#4f9cbb"></i>タッチ開始の密度</span><span class="legend small sub"><i style="background:#2f6f86"></i>動画の範囲</span><span class="legend small sub"><i style="background:#64d5e9"></i>T基準</span><span class="legend small sub"><i style="background:#f9c976"></i>V基準</span><span class="legend small sub"><i style="background:#ff7ad9"></i>選択タップ</span><span class="legend small sub"><i style="background:#9ff0c9"></i>譜面開始/終了</span><span class="legend small sub"><i style="background:#c9a2ff"></i>小節/拍</span></span><label class="small sub">表示幅 <select id="tlZoom" style="padding:4px 6px"><option value="all">全体</option><option value="30000">30秒</option><option value="10000">10秒</option><option value="2000">2秒</option></select></label></div>
 <canvas class="timeline" id="timeline"></canvas>
-<div class="badges"><div class="metric"><label>タッチ時刻</label><strong id="touchClock">00:00.000</strong></div><div class="metric"><label>動画時刻</label><strong id="videoClock">—</strong></div><div class="metric"><label>接触中の指</label><strong id="activeCount">0本</strong></div><div class="metric"><label>開始済みの接触</label><strong id="totalCount">0</strong></div></div>
+<div class="badges"><div class="metric"><label>タッチ時刻</label><strong id="touchClock">00:00.000</strong></div><div class="metric"><label>動画時刻</label><strong id="videoClock">—</strong></div><div class="metric"><label>接触中の指</label><strong id="activeCount">0本</strong></div><div class="metric"><label>開始済みの接触</label><strong id="totalCount">0</strong></div><div class="metric" title="BPMと譜面の開始から数えた位置（「3. 曲の設定」でBPMを入れると出る）"><label>小節・拍</label><strong id="beatClock">—</strong></div></div>
 <div class="between"><span class="small sub">表示中の接触ID：<span id="touchIds">—</span></span><span class="small sub">座標：<span id="position">—</span></span></div>
 </div>
 
@@ -182,7 +189,25 @@ kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
 </details>
 <p class="tip">例えば動画の0:12.500がタッチログの0:03.000に対応するなら、動画の基準点を12.500秒、タッチの基準点を3.000秒にして同期。オフセットは <strong>−9500ms</strong> になる。</p></div>
 
-<div class="panel wide"><h2>使い方と注意</h2><p class="help">基本は動画を選んで ▶ 再生。指は映像の上に重なり、動画側の時計を基準に同期するよ。動画の範囲外（曲の前など）のタッチも、タイムラインやシークバーで移動すれば表示できる。</p><p class="help">ショートカット：<kbd>Space</kbd> 再生/一時停止、<kbd>←</kbd>/<kbd>→</kbd> 100ms移動、<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd> 1記録ずつ移動、<kbd>,</kbd>/<kbd>.</kbd> 前/次のタッチ開始、<kbd>[</kbd>/<kbd>]</kbd> オフセット±1ms、<kbd>{</kbd>/<kbd>}</kbd> ±10ms、<kbd>S</kbd> 表示中のタップを選ぶ、<kbd>A</kbd> 位置合わせ、<kbd>F</kbd> 全画面、<kbd>M</kbd> ミュート。映像エリアのクリックでも再生/一時停止できる。</p><p class="help">オフセット・基準点・表示調整・再生位置・読み込んだタッチデータはこのブラウザに自動保存され、次に開いたときに復元される。ローカル動画はブラウザの制約で自動では開けないので、前回と同じファイルを選び直してね。</p><p class="tip">実測ログの時刻はOSによる記録時刻であり、センサーの真の接触時刻と完全に一致するとは限りません。またログに抜けのある区間は、前後の座標を無理に補間しません。</p><p class="small">YouTubeはネット接続が必要。ブラウザの <code>file://</code> 直開きでは埋め込みが失敗する場合があるので、付属の <code>start_viewer.bat</code> で起動するのがおすすめ。</p></div>
+<div class="panel wide"><h2>3. 曲の設定（BPM・曲の遅れ）</h2>
+<div class="opt-row"><label for="bpmInput">BPM</label><input id="bpmInput" type="number" min="20" max="999" step="0.01" placeholder="例 180"><div class="line"><select id="beatsPerBar" style="padding:5px 7px"><option value="2">2拍子</option><option value="3">3拍子</option><option value="4" selected>4拍子</option><option value="5">5拍子</option><option value="6">6拍子</option><option value="7">7拍子</option></select><button id="bpmTap" style="padding:5px 8px;font-size:12px" title="曲に合わせて4回以上クリックするとBPMを測る">タップで測る</button></div></div>
+<div class="opt-row"><label for="beatShift">小節の頭のずれ</label><input id="beatShift" type="number" step="1" value="0"><div class="line"><span class="small sub">ms</span><button id="beatHere" style="padding:5px 8px;font-size:12px" title="今の動画時刻が小節の頭（1拍目）になるようにずらす">今の動画時刻を小節の頭に</button></div></div>
+<div class="status" id="beatInfo" style="margin-top:8px"></div>
+<div class="sec-title">曲（音声）の遅れ</div>
+<div class="opt-row"><label for="recLag">撮影環境の遅延</label><input id="recLag" type="number" min="0" max="2000" step="1" value="0"><p class="small">ms。録画したときのワイヤレスイヤホンなどの遅延。ゲーム内オフセットをその遅延に合わせていたなら、その値（例 333）。録画の中では曲がノーツよりこの分早いので、再生と書き出しで曲をこの分<b>遅らせる</b>。</p></div>
+<div class="opt-row"><label for="listenLag">聞く環境の遅延</label><input id="listenLag" type="number" min="0" max="2000" step="1" value="0"><p class="small">ms。今このPCで使っているイヤホンなどの遅延。その分、曲を遅らせる量を減らす（撮影と同じイヤホンなら撮影環境と同じ値にすると、曲は遅らせない）。このブラウザだけに保存。</p></div>
+<div class="status" id="extraInfo" style="margin-top:8px"></div>
+<p class="small">タッチは映像に合わせて同期するので、ここでは動かさない。直すのは曲と映像（ノーツ）のずれだけ。ローカル動画のみ（YouTubeの音声は遅らせられない）。</p></div>
+
+<div class="panel wide"><h2>4. 動画を書き出す</h2>
+<p class="small" style="margin-top:0">読み込んだローカル動画にタッチの跡を重ねた動画ファイルを作る。今の同期・オフセット・表示調整（不透明度・軌跡の長さ・ID表示・位置合わせ）がそのまま使われる。等倍速で再生しながら録画するので、書き出す長さと同じだけ時間がかかる。</p>
+<div class="two"><div class="field"><label for="exportRange">範囲</label><select id="exportRange"><option value="chart">譜面の範囲（開始3秒前〜終了3秒後）</option><option value="all">動画全体</option><option value="here">今の位置から最後まで</option></select></div><div class="field"><label for="exportSize">解像度（短い辺）</label><select id="exportSize"><option value="720">720p</option><option value="1080" selected>1080p</option><option value="src">元の解像度</option></select></div></div>
+<label class="small sub" style="display:block;margin:8px 0"><input id="exportAudio" type="checkbox" checked> 音声も入れる</label>
+<button id="exportBtn" class="primary full">● 書き出し開始</button>
+<div class="exp-bar" style="margin-top:8px"><div id="exportProg"></div></div>
+<div class="status" id="exportStatus" style="margin-top:8px"></div></div>
+
+<div class="panel wide"><h2>使い方と注意</h2><p class="help">基本は動画を選んで ▶ 再生。指は映像の上に重なり、動画側の時計を基準に同期するよ。動画の範囲外（曲の前など）のタッチも、タイムラインやシークバーで移動すれば表示できる。</p><p class="help">ショートカット：<kbd>Space</kbd> 再生/一時停止、<kbd>←</kbd>/<kbd>→</kbd> 100ms移動、<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd> 1記録ずつ移動、<kbd>,</kbd>/<kbd>.</kbd> 前/次のタッチ開始、<kbd>[</kbd>/<kbd>]</kbd> オフセット±1ms、<kbd>{</kbd>/<kbd>}</kbd> ±10ms、<kbd>S</kbd> 表示中のタップを選ぶ、<kbd>P</kbd> タッチから開始を決める、<kbd>A</kbd> 位置合わせ、<kbd>H</kbd> 操作ヒントの表示切替、<kbd>F</kbd> 全画面、<kbd>M</kbd> ミュート。映像エリアのクリックでも再生/一時停止できる。</p><p class="help">オフセット・基準点・表示調整・再生位置・読み込んだタッチデータはこのブラウザに自動保存され、次に開いたときに復元される。ローカル動画はブラウザの制約で自動では開けないので、前回と同じファイルを選び直してね。</p><p class="tip">実測ログの時刻はOSによる記録時刻であり、センサーの真の接触時刻と完全に一致するとは限りません。またログに抜けのある区間は、前後の座標を無理に補間しません。</p><p class="small">YouTubeはネット接続が必要。ブラウザの <code>file://</code> 直開きでは埋め込みが失敗する場合があるので、付属の <code>start_viewer.bat</code> で起動するのがおすすめ。</p></div>
 </aside></div>
 </main>
 <script>
@@ -191,13 +216,21 @@ const WIDTH=1194,HEIGHT=834,doc=id=>document.getElementById(id);
 const stage=doc('touchCanvas'),ctx=stage.getContext('2d'),seek=doc('seek'),localVideo=doc('localVideo'),timeline=doc('timeline');
 // key: [default, min, max, step, unit, label]
 const OVERLAY={opacity:[90,0,100,1,'%','軌跡の不透明度'],trail:[550,0,3000,10,'ms','軌跡の長さ'],scaleX:[100,25,200,0.1,'%','横方向の倍率'],scaleY:[100,25,200,0.1,'%','縦方向の倍率'],shiftX:[0,-600,600,1,'px','横方向のずれ'],shiftY:[0,-420,420,1,'px','縦方向のずれ']};
-const OVERLAY_KEYS=Object.keys(OVERLAY),VIEW_KEYS=['showGrid','showIds','showTouch'],STORE_KEY='arcaeaTouchStudio.state.v1',DATA_KEY='arcaeaTouchStudio.data.v1';
+const OVERLAY_KEYS=Object.keys(OVERLAY),VIEW_KEYS=['showGrid','showIds','showTouch','showHints'],STORE_KEY='arcaeaTouchStudio.state.v1',DATA_KEY='arcaeaTouchStudio.data.v1';
 const ov=Object.fromEntries(OVERLAY_KEYS.map(k=>[k,OVERLAY[k][0]]));
 let data=null,mediaMode='none',youtubePlayer=null,youtubeReady=false,youtubePlayerState=-1,ytScriptRequested=false,ytPendingID=null;
 // linked: touch time follows the video (t = video + offset). outside: linked, but t maps before/after the video, so touches run on their own clock.
 let t=0,offsetMs=0,videoAnchorMs=null,touchAnchorMs=null,linked=true,outside=false,playing=false,baseT=0,baseClock=0,lastDraw=0,objectURL=null,seekDrag=false;
 let minTime=-2000,maxTime=2000,frameMs=1000/30,alignMode=false,autoFit=true,alignDrag=null,tlDrag=null,tlBox=[0,0,0];
 let localInfo=null,mismatchFrom=null,muted=false,currentTab='local',persistTimer=null,restoring=false,dragDepth=0;
+// Touches follow the picture, so only the sound gets corrected. recLagMs: output lag (wireless earphones) while
+// recording; when the game's offset was set to it, the recording's music runs that much ahead of the notes, so it is
+// played (and exported) that much later. listenLagMs: output lag here, which already delays the sound (this browser only)
+let syncMs=0,recLagMs=0,listenLagMs=0;
+// Song: beats are counted on the video clock from the chart start (+ beatShiftMs)
+let bpm=null,beatsPerBar=4,beatShiftMs=0;
+// pickMode: clicking a touch on the stage makes it the chart start. exporting: a running video export
+let pickMode=null,exporting=null;
 
 // ---------- helpers ----------
 function fmt(ms){let sign=ms<0?'−':'';ms=Math.abs(Math.round(ms));let mins=Math.floor(ms/60000),secs=Math.floor(ms%60000/1000),msec=ms%1000;return sign+String(mins).padStart(2,'0')+':'+String(secs).padStart(2,'0')+'.'+String(msec).padStart(3,'0')}
@@ -299,7 +332,9 @@ function updateLimits(){
   seek.min=String(minTime);seek.max=String(maxTime);doc('minLabel').textContent=fmt(minTime);doc('maxLabel').textContent=fmt(maxTime);
 }
 function setOffset(v){
-  if(!Number.isFinite(v))return;offsetMs=Math.round(v);doc('offsetInput').value=String(offsetMs);doc('offsetReadout').textContent=fmtOffset(offsetMs);doc('offsetMini').textContent=fmtOffset(offsetMs);updateLimits();
+  if(!Number.isFinite(v))return;syncMs=offsetMs=Math.round(v);
+  doc('offsetInput').value=String(syncMs);doc('offsetReadout').textContent=fmtOffset(syncMs);doc('offsetMini').textContent=fmtOffset(syncMs);
+  updateLimits();
   if(mediaExists()&&linked){if(outside)setTouchTime(t);else{const now=mediaNow();if(now!==null)t=now+offsetMs}}
   draw();persist();
 }
@@ -323,11 +358,11 @@ function play(){
   if(!mediaExists()){if(t>=data.duration)t=0;playing=true;baseT=t;baseClock=performance.now()}
   else if(mediaMode==='youtube'&&!(youtubeReady&&youtubePlayer)){setStatus('YouTubeプレイヤーの準備中、または埋め込み失敗。localhostから起動し、動画の埋め込み設定も確認してね。','warning');return}
   else if(linked&&outside){playing=true;baseT=t;baseClock=performance.now()}
-  else{playing=true;startVideo()}
+  else{playing=true;syncAudioGraph();startVideo()}
   updatePlayUI();
 }
 function pause(){stopMedia();playing=false;updatePlayUI();persist()}
-function toggle(){clearTimeout(replayTimer);playing?pause():play()}
+function toggle(){if(exporting)return;if(pickMode){setSyncStatus('タッチを選んでいる間は再生しない（動画は譜面の開始で止めたまま）。Escでやめられる。');return}clearTimeout(replayTimer);playing?pause():play()}
 function updatePlayUI(){doc('playBtn').textContent=playing?'Ⅱ 一時停止':'▶ 再生'}
 // Video element/player events. While outside the video range the video is parked, so its pause must not stop touch playback.
 function resumeMediaState(){if(linked&&outside)return;if(mediaMode==='local')playing=!localVideo.paused&&!localVideo.ended;else if(mediaMode==='youtube')playing=youtubePlayerState===1;updatePlayUI()}
@@ -369,7 +404,7 @@ function estimatedOffset(){
 }
 function fileLabel(info){return `${info.name} (${(info.size/1024/1024).toFixed(1)}MB)`}
 function loadLocal(file){if(!file)return;mismatchFrom=localInfo&&localInfo.name!==file.name?localInfo.name:null;setSource('local');objectURL=URL.createObjectURL(file);localVideo.classList.remove('hidden');localVideo.src=objectURL;localVideo.load();frameMs=1000/30;watchFrames();localInfo={name:file.name,size:file.size};doc('localFileName').textContent=fileLabel(localInfo);setStatus('ローカル動画の準備中…');persist();videoClock=null;detectVideoClock(file).then(c=>{videoClock=c;renderCandidates()})}
-localVideo.addEventListener('loadedmetadata',()=>{applyMediaPrefs();if(mismatchFrom)setStatus(`動画を読み込みました。ただし保存済みの同期設定は「${mismatchFrom}」用です。別の動画ならオフセットを確認してね。`,'warning');else setStatus('動画を読み込みました。データはPC内に保存されたままです。','good');mismatchFrom=null;updateLimits();setTouchTime(t);renderCandidates()});
+localVideo.addEventListener('loadedmetadata',()=>{applyMediaPrefs();if(mismatchFrom)setStatus(`動画を読み込みました。ただし保存済みの同期設定は「${mismatchFrom}」用です。別の動画ならオフセットを確認してね。`,'warning');else setStatus('動画を読み込みました。データはPC内に保存されたままです。','good');mismatchFrom=null;updateLimits();setTouchTime(t);renderCandidates();updateExportUI()});
 localVideo.addEventListener('play',resumeMediaState);localVideo.addEventListener('pause',resumeMediaState);localVideo.addEventListener('ended',resumeMediaState);
 localVideo.addEventListener('error',()=>{if(mediaMode==='local'&&localVideo.getAttribute('src'))setStatus('動画ファイルを再生できません。ブラウザが対応するコーデック（H.264 MP4など）を使ってね。','warning')});
 // Learn the real frame duration while playing so the "1コマ" buttons step one video frame
@@ -385,12 +420,15 @@ function updateLinkUI(){
 }
 function updateStageLabel(){
   const el=doc('stageLabel');let text,cls='';
-  if(alignMode){text='位置合わせ中：ドラッグで移動 · ホイールで拡大縮小（Shift=横のみ / Alt=縦のみ）· Escで終了';cls='align'}
+  if(exporting){text='書き出し中… 終わるまでこのタブを表示したままにしてね（Escで中止）';cls='align'}
+  else if(pickMode){text='タッチから開始を決める：動画は譜面の開始で停止中。'+(doc('showHints').checked?'':'シークバー・←/→・,/. でタッチだけを動かし、最初のノーツを叩いたタッチの輪をクリック · Escでやめる');cls='align'}
+  else if(alignMode){text='位置合わせ中：ドラッグで移動 · ホイールで拡大縮小（Shift=横のみ / Alt=縦のみ）· Escで終了';cls='align'}
   else if(!mediaExists())text='タッチのみ表示中 · 映像エリアをクリックすると動画を選べる';
   else if(!linked){text='切り離し中：再生と「1コマ」は動画だけ、シークバー・タイムライン・「開始 ⏭」はタッチだけを動かす';cls='unlinked'}
   else if(outside){text='動画の範囲外：タッチだけを表示中（動画の範囲に入ると動画も動き出す）';cls='unlinked'}
-  else text='指の位置は記録上の座標 · 映像との位置合わせは下の「表示調整・位置合わせ」から';
-  el.textContent=text;el.className='overlay-label'+(cls?' '+cls:'');
+  // The hints already cover the normal state; keep the top of the video clear
+  else text=doc('showHints').checked?'':'指の位置は記録上の座標 · 映像との位置合わせは下の「表示調整・位置合わせ」から';
+  el.textContent=text;el.className='overlay-label'+(cls?' '+cls:'')+(text?'':' hidden');updateExportUI();updateLagUI();
 }
 function unlink(){if(!mediaExists()||!linked)return;if(playing)pause();linked=false;outside=false;updateLinkUI();draw()}
 function relink(){linked=true;outside=false;const v=mediaNow();if(v!==null)t=v+offsetMs;updateLinkUI();draw();persist()}
@@ -405,10 +443,10 @@ doc('setTouchAnchor').onclick=()=>{
   if(playing)pause();touchAnchorMs=Math.round(t);unlink();updateAnchorsUI();
   setSyncStatus(videoAnchorMs!==null?'両方そろいました。「基準点を一致させる」を押してね。':mediaExists()?'タッチの基準点を設定しました。次は動画側だけを動かして（再生・「1コマ」など）、同じ瞬間で「動画の基準点を設定」を押してね。':'タッチの基準点を設定しました。動画を読み込んだら、同じ瞬間で「動画の基準点を設定」を押してね。');persist();
 };
-doc('syncAnchors').onclick=()=>{if(videoAnchorMs===null||touchAnchorMs===null){setSyncStatus('動画側とタッチ側、両方の基準点を先に設定してね。','warning');return}setOffset(touchAnchorMs-videoAnchorMs);relink();setSyncStatus(`同期しました（オフセット ${fmtOffset(offsetMs)}）。さらに±1msずつ微調整できます。`,'good')};
+doc('syncAnchors').onclick=()=>{if(videoAnchorMs===null||touchAnchorMs===null){setSyncStatus('動画側とタッチ側、両方の基準点を先に設定してね。','warning');return}setOffset(touchAnchorMs-videoAnchorMs);relink();setSyncStatus(`同期しました（オフセット ${fmtOffset(syncMs)}）。さらに±1msずつ微調整できます。`,'good')};
 document.querySelectorAll('[data-vstep]').forEach(b=>b.onclick=()=>{const v=mediaNow();if(v===null){setSyncStatus('先に動画を読み込んでね。','warning');return}const s=b.dataset.vstep,d=s==='frame'?frameMs:s==='-frame'?-frameMs:+s;if(playing)pause();if(linked)setTouchTime((outside?Math.max(0,t-offsetMs):v)+d+offsetMs);else{setVideoTime(v+d);draw()}});
 doc('applyOffset').onclick=()=>setOffset(+doc('offsetInput').value);doc('offsetInput').addEventListener('keydown',e=>{if(e.key==='Enter')setOffset(+e.target.value)});
-document.querySelectorAll('[data-offset]').forEach(b=>b.onclick=()=>setOffset(offsetMs+ +b.dataset.offset));doc('zeroOffset').onclick=()=>setOffset(0);
+document.querySelectorAll('[data-offset]').forEach(b=>b.onclick=()=>setOffset(syncMs+ +b.dataset.offset));doc('zeroOffset').onclick=()=>setOffset(0);
 
 // ---------- tap picker: align one tap's start to the current video frame ----------
 const TAP_PAGE=8,BIG_GAP=1500;let selectedTap=null,tapPage=0,tapSelText='';
@@ -431,7 +469,7 @@ function updateTapSelUI(){
   const v=mediaNow();doc('syncVideoClock').textContent=v===null?'—':fmt(v);
   let text;
   if(selectedTap===null)text='タップ未選択：一覧の行をクリックするか「表示中のタップ」で選ぶ';
-  else{const from=data.starts[selectedTap],to=data.strokes[selectedTap][2];text=`選択中 #${selectedTap+1} · 開始 ${fmt(from)} · ${tapPos(selectedTap)} · ${to-from}ms`+(v===null?' — 動画を読み込むと合わせられる':` → 今の動画 ${fmt(v)} に合わせるとオフセット ${fmtOffset(Math.round(from-v))}`)}
+  else{const from=data.starts[selectedTap],to=data.strokes[selectedTap][2];text=`選択中 #${selectedTap+1} · 開始 ${fmt(from)} · ${tapPos(selectedTap)} · ${to-from}ms`+gridText(from)+(v===null?' — 動画を読み込むと合わせられる':` → 今の動画 ${fmt(v)} に合わせるとオフセット ${fmtOffset(Math.round(from-v))}`)}
   if(text!==tapSelText){tapSelText=text;doc('tapSel').textContent=text}
   doc('alignTap').disabled=selectedTap===null||v===null;
 }
@@ -441,7 +479,7 @@ function alignSelectedTap(){
   if(playing)pause();
   const from=data.starts[selectedTap];videoAnchorMs=Math.round(v);touchAnchorMs=from;updateAnchorsUI();
   setOffset(from-videoAnchorMs);relink();
-  setSyncStatus(`タップ #${selectedTap+1}（${fmt(from)}）を動画 ${fmt(videoAnchorMs)} に合わせました（オフセット ${fmtOffset(offsetMs)}）。±1msボタンや [ ] キーで微調整できます。`,'good');
+  setSyncStatus(`タップ #${selectedTap+1}（${fmt(from)}）を動画 ${fmt(videoAnchorMs)} に合わせました（オフセット ${fmtOffset(syncMs)}）。±1msボタンや [ ] キーで微調整できます。`,'good');
 }
 doc('tapList').addEventListener('click',e=>{const view=e.target.closest('[data-view]');if(view){const i=+view.dataset.view;selectTap(i,true);setTouchTime(data.starts[i]);return}const row=e.target.closest('.tap-row');if(row)selectTap(+row.dataset.i,true)});
 doc('tapFirst').onclick=()=>{tapPage=0;renderTapList()};
@@ -495,21 +533,22 @@ function applyCandidate(i){
   if(!mediaExists()){setSyncStatus('先に動画を読み込んでね。','warning');return}
   i=Math.max(0,Math.min(candidates.length-1,i));const c=candidates[i];if(!c)return;
   clearTimeout(replayTimer);if(playing)pause();
-  if(offsetBeforeCand===null)offsetBeforeCand=offsetMs;
+  if(offsetBeforeCand===null)offsetBeforeCand=syncMs;
+  pickMode=null;updatePickUI();
   candActive=i;selectedTap=c.taps[0];videoAnchorMs=chartStartV;touchAnchorMs=c.start;updateAnchorsUI();
   setOffset(c.start-chartStartV);relink();setTouchTime(c.start);
   renderCandidates();renderTapList();
-  setSyncStatus(`候補${i===0?'★':i+1}（タッチ ${fmt(c.start)}${c.taps.length>1?`、${c.taps.length}本同時`:''}）を譜面の開始 ${fmt(chartStartV)} に合わせました（オフセット ${fmtOffset(offsetMs)}）。映像の最初のノーツとピンクの輪が重なるか、「確認再生」で確かめてね。`,'good');
+  setSyncStatus(`候補${i===0?'★':i+1}（タッチ ${fmt(c.start)}${c.taps.length>1?`、${c.taps.length}本同時`:''}）を譜面の開始 ${fmt(chartStartV)} に合わせました（オフセット ${fmtOffset(syncMs)}）。映像の最初のノーツとピンクの輪が重なるか、「確認再生」で確かめてね。`,'good');
 }
 doc('setChartStart').onclick=()=>{
   const v=mediaNow();if(v===null){setSyncStatus('先に動画を読み込んでね（1. 動画を読み込む）。','warning');return}
-  if(playing)pause();chartStartV=Math.round(v);candActive=null;updateChartMarks();renderCandidates();persist();
+  if(playing)pause();chartStartV=Math.round(v);candActive=null;updateChartMarks();renderCandidates();updateBeatInfo();updateExportUI();persist();
   setSyncStatus(`譜面の開始を動画 ${fmt(chartStartV)} にしました。②の候補をクリックして試してね。`,'good');
 };
 doc('setChartEnd').onclick=()=>{
   const v=mediaNow();if(v===null){setSyncStatus('先に動画を読み込んでね。','warning');return}
   if(chartStartV!==null&&v<=chartStartV){setSyncStatus('終了は開始より後の時刻にしてね。','warning');return}
-  if(playing)pause();chartEndV=Math.round(v);updateChartMarks();renderCandidates();persist();
+  if(playing)pause();chartEndV=Math.round(v);updateChartMarks();renderCandidates();updateExportUI();persist();
   setSyncStatus(`譜面の終了を動画 ${fmt(chartEndV)} にしました。候補ごとに「終了のずれ」が出ます（小さいほど曲の長さが合っている）。`,'good');
 };
 doc('candList').addEventListener('click',e=>{const r=e.target.closest('[data-c]');if(r)applyCandidate(+r.dataset.c)});
@@ -520,12 +559,172 @@ doc('candReplay').onclick=()=>{
   clearTimeout(replayTimer);setTouchTime(chartStartV+offsetMs-1000);play();
   replayTimer=setTimeout(()=>{if(playing)pause()},4000/Number(doc('speed').value));
 };
-doc('applyEst').onclick=()=>{const est=estimatedOffset();if(est===null)return;clearTimeout(replayTimer);if(playing)pause();if(offsetBeforeCand===null)offsetBeforeCand=offsetMs;setOffset(est);relink();renderCandidates();setSyncStatus(`録画の時刻から推定したオフセット ${fmtOffset(est)} を当てはめました。1秒以内のずれは、譜面の開始を決めて候補を選ぶか、±10msで詰める。`,'good')};
+doc('applyEst').onclick=()=>{const est=estimatedOffset();if(est===null)return;clearTimeout(replayTimer);if(playing)pause();if(offsetBeforeCand===null)offsetBeforeCand=syncMs;setOffset(est);relink();renderCandidates();setSyncStatus(`録画の時刻から推定したオフセット ${fmtOffset(est)} を当てはめました。1秒以内のずれは、譜面の開始を決めて候補を選ぶか、±10msで詰める。`,'good')};
 // Keep the stage + playbar + sync bar on screen together: the stage shrinks by the bar's height
 function updateSyncBarHeight(){const bar=doc('syncBar');document.documentElement.style.setProperty('--syncbar-h',bar.offsetHeight+8+'px')}
 new ResizeObserver(updateSyncBarHeight).observe(doc('syncBar'));
 doc('syncBarToggle').onclick=()=>{const c=doc('syncBar').classList.toggle('collapsed');doc('syncBarToggle').textContent=c?'開く':'たたむ';updateSyncBarHeight();persist()};
 doc('candUndo').onclick=()=>{if(offsetBeforeCand===null)return;setOffset(offsetBeforeCand);offsetBeforeCand=null;candActive=null;renderCandidates();setSyncStatus('候補を試す前のオフセットに戻しました。')};
+
+// ---------- song: BPM and beat grid ----------
+function beatLen(){return bpm?60000/bpm:null}
+function beatOrigin(){return (chartStartV??0)+beatShiftMs}
+// Bar/beat at a video time; beat counting starts at the first beat of the first bar (1小節 1拍)
+function beatLabel(v){const b=beatLen();if(!b)return '—';const k=Math.floor((v-beatOrigin())/b+1e-6),bar=Math.floor(k/beatsPerBar),beat=k-bar*beatsPerBar;return `${bar+1}小節 ${beat+1}拍`}
+// How far a tap (touch time) lies from the nearest quarter-beat line
+function gridText(from){const b=beatLen();if(!b)return '';const q=b/4,d=from-offsetMs-beatOrigin(),r=Math.round(d-Math.round(d/q)*q);return ` · 1/4拍の線から ${r>=0?'+':'−'}${Math.abs(r)}ms`}
+function updateBeatInfo(){
+  const b=beatLen(),el=doc('beatInfo');
+  if(!b){el.textContent='BPMを入れると、タイムラインに小節と拍の線が出て、今の位置が「何小節目の何拍目か」とタップのずれ（1/4拍の線から何ms）が分かる。';el.className='status';return}
+  el.textContent=`1拍 ${b.toFixed(1)}ms · 1小節 ${(b*beatsPerBar).toFixed(1)}ms · 1小節目の頭 = `+(chartStartV===null?`動画の0秒 ${beatShiftMs?fmtSecSigned(beatShiftMs)+' ':''}（譜面の開始を決めるとそこが基準になる）`:`譜面の開始 ${fmt(chartStartV)} ${beatShiftMs?fmtSecSigned(beatShiftMs):''}`);
+  el.className=chartStartV===null?'status warning':'status good';
+}
+function setBpm(v,silent){v=+v;bpm=Number.isFinite(v)&&v>=20&&v<=999?Math.round(v*100)/100:null;if(document.activeElement!==doc('bpmInput'))doc('bpmInput').value=bpm??'';updateBeatInfo();draw();if(!silent)persist()}
+function setBeatShift(v){v=Math.round(+v);if(!Number.isFinite(v))return;beatShiftMs=v;doc('beatShift').value=v;updateBeatInfo();draw();persist()}
+doc('bpmInput').addEventListener('input',e=>{if(e.target.value==='')setBpm(null);else if(+e.target.value>=20)setBpm(e.target.value)});
+doc('bpmInput').addEventListener('change',e=>{setBpm(e.target.value===''?null:e.target.value);e.target.value=bpm??''});
+doc('beatsPerBar').onchange=e=>{beatsPerBar=+e.target.value;updateBeatInfo();draw();persist()};
+doc('beatShift').addEventListener('change',e=>setBeatShift(e.target.value||0));
+doc('beatHere').onclick=()=>{const b=beatLen();if(!b){showMsg('beatInfo','先にBPMを入れてね。','warning');return}const v=mediaExists()?t-offsetMs:null;if(v===null){showMsg('beatInfo','先に動画を読み込んでね。','warning');return}const base=chartStartV??0,bar=b*beatsPerBar;let d=Math.round(v-base);d=Math.round(((d%bar)+bar)%bar);if(d>bar/2)d=Math.round(d-bar);setBeatShift(d)};
+let bpmTaps=[];
+doc('bpmTap').onclick=()=>{const now=performance.now();if(bpmTaps.length&&now-bpmTaps[bpmTaps.length-1]>2000)bpmTaps=[];bpmTaps.push(now);if(bpmTaps.length>12)bpmTaps.shift();
+  if(bpmTaps.length>=4){const iv=(bpmTaps[bpmTaps.length-1]-bpmTaps[0])/(bpmTaps.length-1);setBpm(Math.round(60000/iv*10)/10);doc('bpmTap').textContent=`タップで測る（${bpmTaps.length}回）`}else doc('bpmTap').textContent=`あと${4-bpmTaps.length}回…`};
+
+// ---------- song audio delay (recording lag − listening lag) ----------
+// The element's sound runs through Web Audio once a delay is needed: element -> play delay -> volume -> speakers, and
+// element -> export delay -> recorder. Created on first need; a media element can be captured only once
+let audioGraph=null;
+const MAX_AUDIO_DELAY=5;
+function ensureAudioGraph(){
+  if(audioGraph)return audioGraph;
+  const ac=new AudioContext(),src=ac.createMediaElementSource(localVideo),playDelay=ac.createDelay(MAX_AUDIO_DELAY),monitor=ac.createGain(),recDelay=ac.createDelay(MAX_AUDIO_DELAY),dest=ac.createMediaStreamDestination();
+  src.connect(playDelay).connect(monitor).connect(ac.destination);src.connect(recDelay).connect(dest);
+  audioGraph={ac,src,playDelay,monitor,recDelay,dest};applyMediaPrefs();return audioGraph;
+}
+// Delay heard here, in real time: the recording's lead scales with playback speed; the earphones' lag does not
+function playDelayMs(){return Math.max(0,recLagMs/+doc('speed').value-listenLagMs)}
+function syncAudioGraph(){
+  if(!audioGraph&&mediaMode==='local'&&playDelayMs()>0)ensureAudioGraph();
+  if(!audioGraph)return;
+  const ac=audioGraph.ac;audioGraph.playDelay.delayTime.setTargetAtTime(Math.min(MAX_AUDIO_DELAY,playDelayMs()/1000),ac.currentTime,0.02);
+  audioGraph.recDelay.delayTime.setTargetAtTime(Math.min(MAX_AUDIO_DELAY,recLagMs/1000),ac.currentTime,0.02);
+  if(ac.state!=='running'&&(playing||exporting))ac.resume().catch(()=>{});
+}
+function updateLagUI(){
+  for(const [id,v] of [['recLag',recLagMs],['listenLag',listenLagMs]])if(document.activeElement!==doc(id))doc(id).value=v;
+  const net=recLagMs-listenLagMs,speed=+doc('speed').value,el=doc('extraInfo');let text,kind='';
+  if(!recLagMs&&!listenLagMs)text='曲の遅れの補正なし。録画の中の曲とノーツがずれていなければ、このままでいい。';
+  else if(mediaMode==='youtube'){text='YouTubeの音声は遅らせられない（ローカル動画のみ）。';kind='warning'}
+  else if(net>0){text=`再生中は曲を ${net}ms 遅らせている（撮影 ${recLagMs} − 聞く ${listenLagMs}）`+(speed!==1?`。${speed}×再生中は ${Math.round(playDelayMs())}ms`:'')+'。';kind='good'}
+  else if(net===0){text='撮影と聞く環境の遅延が同じなので、曲は遅らせない（イヤホンの遅れでちょうど揃う）。';kind='good'}
+  else{text=`聞く環境の遅延の方が ${-net}ms 大きい。曲を早めることはできないので、その分は曲が遅れて聞こえる。`;kind='warning'}
+  if(recLagMs&&mediaMode!=='youtube')text+=` 書き出す動画では曲を ${recLagMs}ms 遅らせる。`;
+  el.textContent=text;el.className='status'+(kind?' '+kind:'');
+}
+function setLag(id,v){v=Math.round(+v);if(!Number.isFinite(v)||v<0)v=0;v=Math.min(2000,v);if(id==='recLag')recLagMs=v;else listenLagMs=v;syncAudioGraph();updateLagUI();updateExportUI();persist()}
+for(const id of ['recLag','listenLag']){doc(id).addEventListener('input',e=>{if(e.target.value!==''&&Number.isFinite(+e.target.value))setLag(id,e.target.value)});doc(id).addEventListener('change',e=>{setLag(id,e.target.value||0);e.target.value=id==='recLag'?recLagMs:listenLagMs})}
+
+// ---------- pick mode: click a touch on the stage to make it the chart start ----------
+function updatePickUI(){const b=doc('pickBtn');b.classList.toggle('selected',!!pickMode);b.textContent=pickMode?'✓ タッチを選択中（Escでやめる）':'👆 タッチから開始を決める';doc('stage').classList.toggle('pick',!!pickMode);updateStageLabel();draw()}
+function setPickMode(on){
+  if(!on){if(!pickMode)return;pickMode=null;relink();updatePickUI();setSyncStatus('タッチから開始を決めるのをやめました（オフセットは元のまま）。');return}
+  if(pickMode||exporting)return;
+  if(!mediaExists()||mediaNow()===null){setSyncStatus('先に動画を読み込んでね（1. 動画を読み込む）。','warning');return}
+  if(alignMode)setAlignMode(false);clearTimeout(replayTimer);if(playing)pause();
+  const fresh=chartStartV===null;if(fresh){chartStartV=Math.round(mediaNow());updateChartMarks();renderCandidates();updateBeatInfo();persist()}
+  // The touch side starts where the current offset puts the chart start; the video stays parked on the chart start
+  const startT=chartStartV+offsetMs;unlink();setVideoTime(chartStartV);pickMode={target:chartStartV,hover:null,spots:[]};setTouchTime(startT,false);updatePickUI();
+  setSyncStatus((fresh?`今の動画時刻 ${fmt(chartStartV)} を譜面の開始にしました。`:`動画を譜面の開始 ${fmt(chartStartV)} で止めています。`)+'シークバー・タイムライン・←/→・,/. でタッチだけを動かすと、近くで始まるタッチが緑の輪で出る。最初のノーツを叩いたタッチの輪をクリックすると、そのタップを譜面の開始に合わせる。','good');
+}
+function pickHit(e){if(!pickMode)return null;const r=stage.getBoundingClientRect(),x=(e.clientX-r.left)*WIDTH/r.width,y=(e.clientY-r.top)*HEIGHT/r.height;let best=null,bd=40*40;for(const [i,px,py] of pickMode.spots){const d=(px-x)**2+(py-y)**2;if(d<bd||(d===bd&&best!==null&&Math.abs(data.starts[i]-t)<Math.abs(data.starts[best]-t))){bd=d;best=i}}return best}
+function applyPickedTap(i){
+  const from=data.starts[i],target=pickMode.target;if(offsetBeforeCand===null)offsetBeforeCand=syncMs;
+  pickMode=null;candActive=null;selectedTap=i;videoAnchorMs=target;touchAnchorMs=from;updateAnchorsUI();
+  setOffset(from-target);relink();setTouchTime(from);renderCandidates();renderTapList();updatePickUI();
+  setSyncStatus(`タップ #${i+1}（タッチ ${fmt(from)}）を譜面の開始 ${fmt(target)} に合わせました（オフセット ${fmtOffset(syncMs)}）。「確認再生」で確かめて、違えば「元に戻す」。`,'good');
+}
+doc('pickBtn').onclick=()=>setPickMode(!pickMode);
+doc('stage').addEventListener('pointermove',e=>{if(!pickMode)return;const h=pickHit(e);if(h!==pickMode.hover){pickMode.hover=h;doc('stage').style.cursor=h===null?'':'pointer';draw()}});
+
+// ---------- on-stage hints ----------
+const HINTS={
+  normal:'<kbd>Space</kbd>/クリック 再生・停止 · <kbd>←</kbd><kbd>→</kbd> 0.1秒 · <kbd>Shift</kbd>+<kbd>←</kbd><kbd>→</kbd> 1記録 · <kbd>,</kbd><kbd>.</kbd> 前/次のタップ<br><kbd>[</kbd><kbd>]</kbd> オフセット±1ms · <kbd>{</kbd><kbd>}</kbd> ±10ms · <kbd>P</kbd> タッチから開始を決める · <kbd>A</kbd> 位置合わせ<br><kbd>F</kbd>/ダブルクリック 全画面 · <kbd>M</kbd> ミュート · <kbd>H</kbd> ヒントを隠す',
+  pick:'<b>タッチから開始を決める</b> · <kbd>←</kbd><kbd>→</kbd> タッチだけ0.1秒 · <kbd>Shift</kbd>+<kbd>←</kbd><kbd>→</kbd> 1記録 · <kbd>,</kbd><kbd>.</kbd> 前/次のタップ<br>緑の輪（近くで始まるタッチ）をクリックで、そのタップを譜面の開始に · <kbd>Esc</kbd> やめる',
+  align:'<b>位置合わせ</b> · ドラッグで移動 · ホイールで拡大縮小（<kbd>Shift</kbd> 横だけ / <kbd>Alt</kbd> 縦だけ）· <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> 1px（<kbd>Shift</kbd> 10px）· <kbd>Esc</kbd> 終了'};
+// While playing, the hints fade out once the mouse rests for a moment, like a video player's controls
+let hintsKey='',hintsWake=0;
+function updateHints(){const on=doc('showHints').checked&&!exporting,mode=pickMode?'pick':alignMode?'align':'normal',idle=playing&&mode==='normal'&&performance.now()-hintsWake>2500,key=on?mode+(idle?'+':''):'off';if(key===hintsKey)return;hintsKey=key;const el=doc('hints');el.classList.toggle('hidden',!on);el.classList.toggle('dim',idle);if(on)el.innerHTML=HINTS[mode]}
+doc('stage').addEventListener('pointermove',()=>{hintsWake=performance.now()});
+
+// ---------- export: the video with the touch overlay, recorded in real time ----------
+const EXPORT_TYPES=['video/mp4;codecs=avc1.640033,mp4a.40.2','video/mp4;codecs=avc1,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+function exportType(){return window.MediaRecorder?EXPORT_TYPES.find(m=>MediaRecorder.isTypeSupported(m))||null:null}
+function exportRange(){
+  const d=currentVideoDuration()??0,r=doc('exportRange').value,v=mediaNow()??0;
+  if(r==='chart'&&chartStartV!==null)return [Math.max(0,chartStartV-3000),chartEndV!==null?Math.min(d,chartEndV+3000):d];
+  return r==='here'?[v,d]:[0,d];
+}
+function updateExportUI(){
+  if(exporting)return;const ok=mediaMode==='local'&&localVideo.readyState>0,type=exportType(),btn=doc('exportBtn');btn.disabled=!ok||!type;
+  const el=doc('exportStatus');
+  if(!type){el.textContent='このブラウザは動画の書き出し（MediaRecorder）に対応していない。ChromeかEdgeで開いてね。';el.className='status warning';return}
+  if(!ok){el.textContent=mediaMode==='youtube'?'YouTubeの動画は書き出せない（ブラウザの制約）。ローカル動画を読み込んでね。':'ローカル動画を読み込むと書き出せる。';el.className='status';return}
+  const [a,b]=exportRange(),fmtName=type.startsWith('video/mp4')?'MP4（H.264）':'WebM';
+  el.textContent=`形式 ${fmtName} · 範囲 ${fmt(a)} 〜 ${fmt(b)}（${((b-a)/1000).toFixed(1)}秒）`+(doc('exportRange').value==='chart'&&chartStartV===null?' · 譜面の開始が未設定なので動画全体':'')+(recLagMs?` · 曲を${recLagMs}ms遅らせる`:'');el.className='status';
+}
+function evenPx(v){return Math.max(2,Math.round(v/2)*2)}
+// Stage units -> output pixels: the video sits object-fit:contain inside the 1194x834 stage
+function drawExportFrame(v){
+  const {oc,W,H}=exporting,a=W/H,r=a>WIDTH/HEIGHT?{x:0,y:(HEIGHT-WIDTH/a)/2,w:WIDTH}:{x:(WIDTH-HEIGHT*a)/2,y:0,w:HEIGHT*a},k=W/r.w;
+  oc.setTransform(1,0,0,1,0,0);oc.drawImage(localVideo,0,0,W,H);
+  oc.setTransform(k,0,0,k,-r.x*k,-r.y*k);overlayDraw(oc,v+offsetMs,true);
+}
+function seekVideoTo(ms){return new Promise(res=>{let done=false;const fin=()=>{if(done)return;done=true;localVideo.removeEventListener('seeked',fin);res()};localVideo.addEventListener('seeked',fin);localVideo.currentTime=ms/1000;setTimeout(fin,4000)})}
+async function startExport(){
+  const type=exportType();if(exporting||!type||mediaMode!=='local'||localVideo.readyState<1)return;
+  const [a,b]=exportRange();if(b-a<500){showMsg('exportStatus','書き出す範囲が短すぎる（0.5秒以上にしてね）。','warning');return}
+  if(pickMode){pickMode=null;updatePickUI()}if(alignMode)setAlignMode(false);clearTimeout(replayTimer);pause();relink();
+  const vw=localVideo.videoWidth,vh=localVideo.videoHeight,size=doc('exportSize').value,k=size==='src'?1:Math.min(1,+size/Math.min(vw,vh)),W=evenPx(vw*k),H=evenPx(vh*k);
+  const out=document.createElement('canvas');out.width=W;out.height=H;
+  const stream=out.captureStream(0),track=stream.getVideoTracks()[0],withAudio=doc('exportAudio').checked;
+  if(withAudio){try{const g=ensureAudioGraph();syncAudioGraph();await g.ac.resume();g.dest.stream.getAudioTracks().forEach(tr=>stream.addTrack(tr))}catch(e){showMsg('exportStatus','音声を取り込めないので映像だけ書き出す: '+e.message,'warning')}}
+  const rec=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:Math.round(Math.min(40e6,Math.max(6e6,W*H*30*0.12))),audioBitsPerSecond:192000}),chunks=[];
+  exporting={rec,oc:out.getContext('2d'),W,H,a,b,type,cancelled:false,finished:false,began:performance.now()};
+  rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  rec.onstop=()=>finishExport(chunks);
+  // Record at 1x (the speakers keep the user's volume through the monitor gain). The delayed sound needs the video to
+  // run on by the delay, so the end of the range keeps its music
+  localVideo.playbackRate=1;syncAudioGraph();const stopAt=b+(withAudio?recLagMs:0);
+  doc('exportBtn').textContent='■ 書き出しを中止';doc('exportBtn').classList.remove('primary');doc('exportProg').style.width='0';
+  showMsg('exportStatus','書き出し中… 終わるまでこのタブを表示したままにしてね（別のタブや最小化だとコマが抜ける）。','good');updateStageLabel();updateHints();
+  await seekVideoTo(a);if(!exporting||exporting.cancelled){rec.stop?.();return}
+  drawExportFrame(a);rec.start(1000);track.requestFrame?.();
+  const onFrame=(now,md)=>{
+    if(!exporting||exporting.finished)return;const v=md.mediaTime*1000;exporting.frames++;
+    drawExportFrame(v);track.requestFrame?.();
+    const p=Math.max(0,Math.min(1,(v-a)/(stopAt-a)));doc('exportProg').style.width=(p*100).toFixed(1)+'%';
+    if(v>=stopAt-1)stopExport(false);else localVideo.requestVideoFrameCallback(onFrame);
+  };
+  localVideo.requestVideoFrameCallback(onFrame);exporting.onEnded=()=>stopExport(false);localVideo.addEventListener('ended',exporting.onEnded);
+  exporting.frames=0;exporting.frameMs=frameMs;play();
+  setTimeout(()=>{if(exporting&&!exporting.finished&&exporting.frames===0){exporting.failMsg='映像のコマが届かないので中止しました。ウィンドウが隠れているか最小化されていると、ブラウザが動画を描かない。この画面を表示したまま、もう一度書き出してね。';stopExport(true)}},2500);
+}
+function stopExport(cancel){if(!exporting||exporting.finished)return;exporting.finished=true;exporting.cancelled=cancel;localVideo.removeEventListener('ended',exporting.onEnded);pause();try{exporting.rec.state!=='inactive'?exporting.rec.stop():finishExport([])}catch(e){finishExport([])}}
+function finishExport(chunks){
+  const x=exporting;if(!x)return;exporting=null;
+  applyMediaPrefs();syncAudioGraph();
+  doc('exportBtn').textContent='● 書き出し開始';doc('exportBtn').classList.add('primary');updateStageLabel();hintsKey='';
+  if(x.cancelled||!chunks.length){doc('exportProg').style.width='0';showMsg('exportStatus',x.failMsg||(x.cancelled?'書き出しを中止しました。':'書き出せませんでした（録画データが空）。'),'warning');return}
+  const ext=x.type.startsWith('video/mp4')?'mp4':'webm',blob=new Blob(chunks,{type:x.type.split(';')[0]});
+  const base=(localInfo?.name||'video').replace(/\.[^.]+$/,'').replace(/[\\/:*?"<>|]+/g,'_'),name=`${base}_touch.${ext}`;
+  const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  doc('exportProg').style.width='100%';
+  // Frames come from the video's own frame callbacks; far fewer than its frame rate means the window was hidden for a while
+  const expected=Math.round((x.b-x.a)/x.frameMs),dropped=x.frames<expected*0.7;
+  showMsg('exportStatus',`書き出しました: ${name}（${(blob.size/1048576).toFixed(1)}MB · ${((x.b-x.a)/1000).toFixed(1)}秒 · ${x.W}×${x.H}）。ブラウザのダウンロード先に保存される。`+(dropped?` ただしコマ落ちが多い（${x.frames}/約${expected}コマ）。途中でウィンドウが隠れていたかもしれないので、表示したまま書き出し直すときれいになる。`:''),dropped?'warning':'good');
+}
+doc('exportBtn').onclick=()=>{if(exporting)stopExport(true);else startExport()};
+doc('exportRange').onchange=updateExportUI;
 
 // ---------- touch navigation ----------
 function stepSample(dir){const s=data.samples;let v;if(dir>0){const i=upperBound(s,t+0.01);v=i<s.length?s[i]:t+1000/120}else{const i=lowerBound(s,t-0.01)-1;v=i>=0?s[i]:t-1000/120}setTouchTime(v)}
@@ -555,6 +754,9 @@ function drawTimeline(){
   g.globalAlpha=1;
   if(zoomed){const i0=lowerBound(starts,a),i1=upperBound(starts,b);for(let i=i0;i<i1;i++){g.fillStyle=color(data.strokes[i][0]);g.fillRect(X(starts[i])-.75,top,1.5,base-top)}}
   const mark=(ms,col,label,dy)=>{const x=X(ms);if(x<-5||x>w+5)return;g.strokeStyle=col;g.lineWidth=1.5;g.setLineDash([4,3]);g.beginPath();g.moveTo(x,top);g.lineTo(x,axisY);g.stroke();g.setLineDash([]);g.fillStyle=col;g.font='10px system-ui';g.fillText(label,x+3,top+10+dy)};
+  const bl=beatLen();
+  if(bl){const o=beatOrigin()+offsetMs,every=bl/span*w>=4?1:bl*beatsPerBar/span*w>=4?beatsPerBar:0;
+    if(every){g.lineWidth=1;for(let k=Math.ceil((a-o)/bl/every)*every;o+k*bl<=b;k+=every){const x=X(o+k*bl),bar=((k%beatsPerBar)+beatsPerBar)%beatsPerBar===0;g.strokeStyle=bar?'#c9a2ff':'#6f5c92';g.globalAlpha=bar?.75:.5;g.beginPath();g.moveTo(x,top);g.lineTo(x,base);g.stroke()}g.globalAlpha=1}}
   if(touchAnchorMs!==null)mark(touchAnchorMs,'#64d5e9','T基準',0);
   if(selectedTap!==null)mark(data.starts[selectedTap],'#ff7ad9','#'+(selectedTap+1),24);
   if(mediaExists()&&chartStartV!==null)mark(chartStartV+offsetMs,'#9ff0c9','譜面開始',36);
@@ -580,28 +782,36 @@ function drawScreenFrame(map){
   ctx.globalAlpha=alignMode?.45:.26;ctx.lineWidth=1.5;ctx.beginPath();for(let i=1;i<4;i++){const x=x0+(x1-x0)*i/4,y=y0+(y1-y0)*i/4;ctx.moveTo(x,y0);ctx.lineTo(x,y1);ctx.moveTo(x0,y);ctx.lineTo(x1,y)}ctx.stroke();
   if(alignMode){ctx.globalAlpha=.9;ctx.fillStyle='#7fe7ff';ctx.font='bold 14px ui-monospace,monospace';ctx.fillText('iPad (0,0)',x0+6,y0+18);ctx.fillText('(1194,834)',x1-98,y1-8)}ctx.restore();
 }
-function overlayDraw(){
-  ctx.clearRect(0,0,WIDTH,HEIGHT);
+function overlayDraw(cv=ctx,at=t,exp=false){
+  if(!exp)cv.clearRect(0,0,WIDTH,HEIGHT);
   // While choosing a start candidate at the chart start, only the numbered candidates are drawn: touches at the
   // not-yet-synced offset would just be noise there
-  const vNow=mediaNow(),picking=chartStartV!==null&&candActive===null&&candidates.length>0&&vNow!==null&&Math.abs(vNow-chartStartV)<=400;
-  const map=makeMapper(),show=doc('showTouch').checked&&!picking,showId=doc('showIds').checked,opacity=ov.opacity/100,trail=ov.trail,strokes=data.strokes,count=upperBound(data.starts,t);
-  if(doc('showGrid').checked||alignMode)drawScreenFrame(map);
+  const vNow=mediaNow(),picking=!exp&&!pickMode&&chartStartV!==null&&candActive===null&&candidates.length>0&&vNow!==null&&Math.abs(vNow-chartStartV)<=400;
+  const map=makeMapper(),show=doc('showTouch').checked&&!picking,showId=doc('showIds').checked,opacity=ov.opacity/100,trail=ov.trail,strokes=data.strokes,count=upperBound(data.starts,at);
+  if(!exp&&(doc('showGrid').checked||alignMode))drawScreenFrame(map);
   let active=[],last=null;
   if(show)for(let s=0;s<count;s++){
-    const [id,from,to,pts]=strokes[s];if(to<t-trail)continue;
-    let en=upperIndex(pts,t);if(!en)continue;let start=Math.max(0,upperIndex(pts,t-trail)-1),cc=color(id);
-    ctx.save();ctx.globalAlpha=opacity*.72;ctx.strokeStyle=cc;ctx.lineWidth=5.5;ctx.lineJoin='round';ctx.lineCap='round';ctx.beginPath();
-    let prev=null;for(let i=start;i<en;i++){let pp=map(pts[i][1]/2,pts[i][2]/2);if(!prev||pts[i][0]-pts[i-1]?.[0]>55)ctx.moveTo(...pp);else ctx.lineTo(...pp);prev=pp}
-    ctx.stroke();ctx.restore();
+    const [id,from,to,pts]=strokes[s];if(to<at-trail)continue;
+    let en=upperIndex(pts,at);if(!en)continue;let start=Math.max(0,upperIndex(pts,at-trail)-1),cc=color(id);
+    cv.save();cv.globalAlpha=opacity*.72;cv.strokeStyle=cc;cv.lineWidth=5.5;cv.lineJoin='round';cv.lineCap='round';cv.beginPath();
+    let prev=null;for(let i=start;i<en;i++){let pp=map(pts[i][1]/2,pts[i][2]/2);if(!prev||pts[i][0]-pts[i-1]?.[0]>55)cv.moveTo(...pp);else cv.lineTo(...pp);prev=pp}
+    cv.stroke();cv.restore();
     let current=pts[en-1],pos=map(current[1]/2,current[2]/2);
-    if(t>=from&&t<=to&&![3,4].includes(current[3])){active.push([id,pos,cc]);last=[current[1]/2,current[2]/2]}
-    else if(t>=to&&t-to<100&&[3,4].includes(current[3])){ctx.save();ctx.strokeStyle=cc;ctx.lineWidth=4;ctx.globalAlpha=opacity*(1-(t-to)/100);ctx.beginPath();ctx.arc(pos[0],pos[1],22,0,Math.PI*2);ctx.stroke();ctx.restore()}
+    if(at>=from&&at<=to&&![3,4].includes(current[3])){active.push([id,pos,cc]);last=[current[1]/2,current[2]/2]}
+    else if(at>=to&&at-to<100&&[3,4].includes(current[3])){cv.save();cv.strokeStyle=cc;cv.lineWidth=4;cv.globalAlpha=opacity*(1-(at-to)/100);cv.beginPath();cv.arc(pos[0],pos[1],22,0,Math.PI*2);cv.stroke();cv.restore()}
   }
-  for(let [id,pos,cc] of active){ctx.save();ctx.globalAlpha=opacity;ctx.shadowBlur=19;ctx.shadowColor=cc;ctx.fillStyle=cc;ctx.strokeStyle='#fff';ctx.lineWidth=2.7;ctx.beginPath();ctx.arc(pos[0],pos[1],13,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();if(showId){ctx.save();ctx.globalAlpha=opacity;ctx.fillStyle='#fff';ctx.font='bold 16px ui-monospace,monospace';ctx.shadowColor='#07121b';ctx.shadowBlur=5;ctx.fillText('0x'+id.toString(16).toUpperCase(),pos[0]+18,pos[1]-11);ctx.restore()}}
-  for(const si of ringTaps()){const [,from,to,pts]=strokes[si];if(t>=from-1000&&t<=to+300){const p=map(pts[0][1]/2,pts[0][2]/2);ctx.save();ctx.strokeStyle='#ff7ad9';ctx.lineWidth=3;ctx.setLineDash([6,5]);ctx.beginPath();ctx.arc(p[0],p[1],26,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#ff7ad9';ctx.font='bold 14px ui-monospace,monospace';ctx.shadowColor='#07121b';ctx.shadowBlur=5;ctx.fillText(`#${si+1}`+(t<from?` あと${((from-t)/1000).toFixed(2)}s`:''),p[0]+30,p[1]+26);ctx.restore()}}
+  for(let [id,pos,cc] of active){cv.save();cv.globalAlpha=opacity;cv.shadowBlur=19;cv.shadowColor=cc;cv.fillStyle=cc;cv.strokeStyle='#fff';cv.lineWidth=2.7;cv.beginPath();cv.arc(pos[0],pos[1],13,0,Math.PI*2);cv.fill();cv.stroke();cv.restore();if(showId){cv.save();cv.globalAlpha=opacity;cv.fillStyle='#fff';cv.font='bold 16px ui-monospace,monospace';cv.shadowColor='#07121b';cv.shadowBlur=5;cv.fillText('0x'+id.toString(16).toUpperCase(),pos[0]+18,pos[1]-11);cv.restore()}}
+  if(!exp)for(const si of ringTaps()){const [,from,to,pts]=strokes[si];if(at>=from-1000&&at<=to+300){const p=map(pts[0][1]/2,pts[0][2]/2);cv.save();cv.strokeStyle='#ff7ad9';cv.lineWidth=3;cv.setLineDash([6,5]);cv.beginPath();cv.arc(p[0],p[1],26,0,Math.PI*2);cv.stroke();cv.setLineDash([]);cv.fillStyle='#ff7ad9';cv.font='bold 14px ui-monospace,monospace';cv.shadowColor='#07121b';cv.shadowBlur=5;cv.fillText(`#${si+1}`+(at<from?` あと${((from-at)/1000).toFixed(2)}s`:''),p[0]+30,p[1]+26);cv.restore()}}
   if(picking){{
-    candidates.forEach((c,i)=>c.taps.forEach(si=>{const p0=strokes[si][3][0],p=map(p0[1]/2,p0[2]/2);ctx.save();ctx.strokeStyle='#ffe19e';ctx.lineWidth=2.5;ctx.setLineDash([4,4]);ctx.beginPath();ctx.arc(p[0],p[1],22,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#ffe19e';ctx.font='bold 20px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#000';ctx.shadowBlur=6;ctx.fillText(i===0?'★':String(i+1),p[0],p[1]);ctx.restore()}))}}
+    candidates.forEach((c,i)=>c.taps.forEach(si=>{const p0=strokes[si][3][0],p=map(p0[1]/2,p0[2]/2);cv.save();cv.strokeStyle='#ffe19e';cv.lineWidth=2.5;cv.setLineDash([4,4]);cv.beginPath();cv.arc(p[0],p[1],22,0,Math.PI*2);cv.stroke();cv.setLineDash([]);cv.fillStyle='#ffe19e';cv.font='bold 20px system-ui';cv.textAlign='center';cv.textBaseline='middle';cv.shadowColor='#000';cv.shadowBlur=6;cv.fillText(i===0?'★':String(i+1),p[0],p[1]);cv.restore()}))}}
+  if(!exp&&pickMode){
+    const lo=lowerBound(data.starts,at-1500),hi=upperBound(data.starts,at+800),spots=[];
+    for(let i=lo;i<hi;i++){const from=data.starts[i],p0=strokes[i][3][0],p=map(p0[1]/2,p0[2]/2),hov=pickMode.hover===i,dt=from-at;
+      cv.save();cv.globalAlpha=hov?1:dt>0?.45:Math.max(.35,1+dt/1500);cv.strokeStyle=hov?'#ffe19e':'#71e3b0';cv.lineWidth=hov?4:2.5;cv.beginPath();cv.arc(p[0],p[1],hov?25:18,0,Math.PI*2);cv.stroke();
+      cv.fillStyle=cv.strokeStyle;cv.font='bold 16px ui-monospace,monospace';cv.shadowColor='#000';cv.shadowBlur=5;cv.fillText(`#${i+1} ${fmtSecSigned(dt)}`+(hov?' クリックで開始に':''),p[0]+24,p[1]-14);cv.restore();spots.push([i,p[0],p[1]])}
+    pickMode.spots=spots;
+  }
+  if(exp)return;
   doc('activeCount').textContent=active.length+'本';doc('totalCount').textContent=count.toLocaleString('ja-JP')+' / '+strokes.length.toLocaleString('ja-JP');
   doc('touchIds').textContent=active.length?active.map(a=>'0x'+a[0].toString(16).toUpperCase()).join(', '):'—';doc('position').textContent=last?last.map(n=>n.toFixed(1)).join(', '):'—';
 }
@@ -609,7 +819,8 @@ function draw(){
   doc('touchClock').textContent=fmt(t);const v=mediaNow();
   doc('videoClock').textContent=v===null?'—':linked&&outside?fmt(t-offsetMs)+'（範囲外）':fmt(v);
   if(!seekDrag)seek.value=String(Math.max(minTime,Math.min(maxTime,Math.round(t))));
-  overlayDraw();drawTimeline();updateTapSelUI();
+  doc('beatClock').textContent=beatLen()&&(mediaExists()||chartStartV!==null)?beatLabel(t-offsetMs):'—';
+  overlayDraw();drawTimeline();updateTapSelUI();updateHints();
 }
 function frame(now){
   if(!seekDrag){
@@ -635,8 +846,8 @@ for(const k of OVERLAY_KEYS){
 function setAutoFit(on){autoFit=on;doc('autoFit').checked=on;draw()}
 doc('autoFit').onchange=e=>{setAutoFit(e.target.checked);persist()};
 doc('resetOverlay').onclick=()=>{for(const k of OVERLAY_KEYS)setOverlay(k,OVERLAY[k][0]);setAutoFit(true);persist()};
-for(const k of VIEW_KEYS)doc(k).onchange=()=>{draw();persist()};
-function setAlignMode(on){alignMode=on;doc('stage').classList.toggle('align',on);doc('alignBtn').classList.toggle('selected',on);doc('alignBtn').textContent=on?'✓ 位置合わせ中':'✥ 位置合わせ';updateStageLabel();draw()}
+for(const k of VIEW_KEYS)doc(k).onchange=()=>{updateStageLabel();draw();persist()};
+function setAlignMode(on){if(on&&pickMode)setPickMode(false);alignMode=on;doc('stage').classList.toggle('align',on);doc('alignBtn').classList.toggle('selected',on);doc('alignBtn').textContent=on?'✓ 位置合わせ中':'✥ 位置合わせ';updateStageLabel();draw()}
 doc('alignBtn').onclick=()=>setAlignMode(!alignMode);
 doc('stage').addEventListener('pointerdown',e=>{if(!alignMode||e.button!==0)return;e.preventDefault();try{doc('stage').setPointerCapture(e.pointerId)}catch(err){}alignDrag={x:e.clientX,y:e.clientY,sx:ov.shiftX,sy:ov.shiftY,k:WIDTH/doc('touchCanvas').getBoundingClientRect().width}});
 doc('stage').addEventListener('pointermove',e=>{if(!alignDrag)return;setOverlay('shiftX',alignDrag.sx+(e.clientX-alignDrag.x)*alignDrag.k);setOverlay('shiftY',alignDrag.sy+(e.clientY-alignDrag.y)*alignDrag.k)});
@@ -662,18 +873,18 @@ window.addEventListener('drop',e=>{
   if(files.length&&!video&&!log&&!json)setStatus('動画ファイル（MP4/WebMなど）、タッチログ（.jsonl）、同期設定（.json）のどれかをドロップしてね。','warning');
 });
 doc('playBtn').onclick=toggle;
-function applyMediaPrefs(){const speed=+doc('speed').value,vol=+doc('volume').value/100;if(mediaMode==='local'){localVideo.playbackRate=speed;localVideo.volume=vol;localVideo.muted=muted}else if(mediaMode==='youtube'&&youtubeReady&&youtubePlayer){try{youtubePlayer.setPlaybackRate(speed);youtubePlayer.setVolume(vol*100);muted?youtubePlayer.mute():youtubePlayer.unMute()}catch(e){}}doc('muteBtn').textContent=muted||vol===0?'🔇':'🔊'}
+function applyMediaPrefs(){const speed=+doc('speed').value,vol=+doc('volume').value/100;if(mediaMode==='local'){localVideo.playbackRate=speed;if(audioGraph){localVideo.volume=1;localVideo.muted=false;audioGraph.monitor.gain.value=muted?0:vol}else{localVideo.volume=vol;localVideo.muted=muted}}else if(mediaMode==='youtube'&&youtubeReady&&youtubePlayer){try{youtubePlayer.setPlaybackRate(speed);youtubePlayer.setVolume(vol*100);muted?youtubePlayer.mute():youtubePlayer.unMute()}catch(e){}}doc('muteBtn').textContent=muted||vol===0?'🔇':'🔊'}
 doc('muteBtn').onclick=()=>{muted=!muted;applyMediaPrefs();persist()};doc('volume').addEventListener('input',()=>{muted=false;applyMediaPrefs();persist()});
-doc('speed').onchange=()=>{applyMediaPrefs();if(playing&&(!mediaExists()||(linked&&outside))){baseT=t;baseClock=performance.now()}persist()};
+doc('speed').onchange=()=>{applyMediaPrefs();syncAudioGraph();updateLagUI();if(playing&&(!mediaExists()||(linked&&outside))){baseT=t;baseClock=performance.now()}persist()};
 // Fullscreen the whole stage so the touch canvas stays on top of the video
 function toggleFullscreen(){if(document.fullscreenElement)document.exitFullscreen();else doc('stage').requestFullscreen?.().catch(e=>setStatus('全画面にできません: '+e.message,'warning'))}
 doc('fullscreenBtn').onclick=toggleFullscreen;document.addEventListener('fullscreenchange',()=>{doc('fullscreenBtn').textContent=document.fullscreenElement?'⛶ 全画面解除':'⛶ 全画面';draw()});
-doc('stage').addEventListener('click',e=>{if(alignMode||e.detail>1)return;if(!mediaExists()){selectTab('local');doc('localFile').click()}else toggle()});
-doc('stage').addEventListener('dblclick',()=>{if(mediaExists()&&!alignMode)toggleFullscreen()});
+doc('stage').addEventListener('click',e=>{if(exporting)return;if(pickMode){const i=pickHit(e);if(i!==null)applyPickedTap(i);else setSyncStatus('タッチの輪の上をクリックしてね。輪が出ていなければ、←/→ や ,/. でタッチ側を動かす。');return}if(alignMode||e.detail>1)return;if(!mediaExists()){selectTab('local');doc('localFile').click()}else toggle()});
+doc('stage').addEventListener('dblclick',()=>{if(mediaExists()&&!alignMode&&!pickMode&&!exporting)toggleFullscreen()});
 
 // ---------- settings file + auto-save ----------
 function downloadData(name,obj){let blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000)}
-function settingsSnapshot(){return {version:1,source:mediaMode==='none'?(currentTab==='yt'?'youtube':'local'):mediaMode,videoURL:doc('ytUrl').value,localVideo:localInfo,touchData:data.source,offsetMs,videoAnchorMs,touchAnchorMs,chartStartMs:chartStartV,chartEndMs:chartEndV,autoFit,overlay:{...ov}}}
+function settingsSnapshot(){return {version:1,source:mediaMode==='none'?(currentTab==='yt'?'youtube':'local'):mediaMode,videoURL:doc('ytUrl').value,localVideo:localInfo,touchData:data.source,offsetMs:syncMs,recLagMs,bpm,beatsPerBar,beatShiftMs,videoAnchorMs,touchAnchorMs,chartStartMs:chartStartV,chartEndMs:chartEndV,autoFit,overlay:{...ov}}}
 function settingsFileName(){let base=localInfo?localInfo.name.replace(/\.[^.]+$/,''):getYtID(doc('ytUrl').value);base=(base||'settings').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,60);return `arcaea_touch_sync_${base}.json`}
 doc('saveSettings').onclick=()=>downloadData(settingsFileName(),settingsSnapshot());
 function applySettings(j){
@@ -683,6 +894,8 @@ function applySettings(j){
   if(j.overlay)for(let [k,v] of Object.entries(j.overlay))if(OVERLAY_KEYS.includes(k)&&Number.isFinite(v))setOverlay(k,v);
   // Files saved before auto-fit existed were tuned against the whole stage, so keep that mapping for them
   setAutoFit(typeof j.autoFit==='boolean'?j.autoFit:false);
+  const num=(v,d=0)=>Number.isFinite(v)?Math.round(v):d;recLagMs=Math.max(0,num(j.recLagMs));updateLagUI();
+  bpm=null;setBpm(j.bpm,true);beatsPerBar=[2,3,4,5,6,7].includes(j.beatsPerBar)?j.beatsPerBar:4;doc('beatsPerBar').value=String(beatsPerBar);beatShiftMs=num(j.beatShiftMs);doc('beatShift').value=beatShiftMs;updateBeatInfo();
   setOffset(j.offsetMs||0);if(j.source==='youtube')selectTab('yt');else if(j.source==='local')selectTab('local');
   // A local file cannot be reopened by the page itself; remember its name so the user knows which one to pick
   if(j.localVideo&&typeof j.localVideo.name==='string'){localInfo={name:j.localVideo.name,size:+j.localVideo.size||0};if(mediaMode!=='local')doc('localFileName').textContent='前回の動画: '+fileLabel(localInfo)+' — 同じファイルを選び直してね'}
@@ -690,7 +903,7 @@ function applySettings(j){
 async function loadSettingsFile(file){try{let j=JSON.parse(await file.text());applySettings(j);const other=j.touchData&&j.touchData!==data.source?` この設定はタッチデータ「${j.touchData}」用です。`:'';setStatus((j.localVideo?.name&&mediaMode!=='local'?`同期設定を復元しました。動画「${j.localVideo.name}」を選び直してね。`:'同期設定を復元しました。')+other,other?'warning':'good')}catch(err){setStatus('設定の読み込みに失敗: '+err.message,'warning')}}
 doc('loadSettings').onclick=()=>doc('settingsFile').click();doc('settingsFile').onchange=async e=>{let file=e.target.files?.[0];if(file)await loadSettingsFile(file);e.target.value=''};
 // Auto-save to this browser so a reload or restart does not lose the calibration
-function saveState(){clearTimeout(persistTimer);try{localStorage.setItem(STORE_KEY,JSON.stringify({...settingsSnapshot(),view:Object.fromEntries(VIEW_KEYS.map(k=>[k,doc(k).checked])),speed:doc('speed').value,volume:+doc('volume').value,muted,tlZoom:doc('tlZoom').value,dataTitle:data.name,syncBarCollapsed:doc('syncBar').classList.contains('collapsed'),t:Math.round(t)}))}catch(e){}}
+function saveState(){clearTimeout(persistTimer);try{localStorage.setItem(STORE_KEY,JSON.stringify({...settingsSnapshot(),view:Object.fromEntries(VIEW_KEYS.map(k=>[k,doc(k).checked])),speed:doc('speed').value,volume:+doc('volume').value,muted,tlZoom:doc('tlZoom').value,dataTitle:data.name,syncBarCollapsed:doc('syncBar').classList.contains('collapsed'),listenLagMs,t:Math.round(t)}))}catch(e){}}
 function persist(){if(restoring)return;clearTimeout(persistTimer);persistTimer=setTimeout(saveState,300)}
 function restoreState(){
   let saved=null;try{saved=JSON.parse(localStorage.getItem(DATA_KEY)||'null')}catch(e){}
@@ -699,6 +912,7 @@ function restoreState(){
   if(!j||j.version!==1){setOffset(0);return}
   restoring=true;
   try{
+    listenLagMs=Number.isFinite(j.listenLagMs)?Math.max(0,Math.round(j.listenLagMs)):0;
     applySettings(j);
     if(typeof j.dataTitle==='string'&&j.dataTitle){data.name=j.dataTitle;doc('dataTitle').value=j.dataTitle;updateDataUI()}
     for(const k of VIEW_KEYS)if(typeof j.view?.[k]==='boolean')doc(k).checked=j.view[k];
@@ -773,15 +987,17 @@ function isTyping(el){return !!el&&(el.isContentEditable||el.tagName==='TEXTAREA
 // Shortcuts stay active after clicking a button (Space must not re-press the focused button); other sliders keep their own arrow keys
 window.addEventListener('keydown',e=>{
   const el=document.activeElement;if(isTyping(el)||e.ctrlKey||e.metaKey||e.altKey)return;const key=e.key;if(el?.type==='range'&&el!==seek&&key!==' ')return;
+  if(exporting){if(key==='Escape')stopExport(true);if(key===' ')e.preventDefault();return}
   if(alignMode&&key.startsWith('Arrow')){e.preventDefault();const d=e.shiftKey?10:1;if(key==='ArrowLeft')setOverlay('shiftX',ov.shiftX-d);else if(key==='ArrowRight')setOverlay('shiftX',ov.shiftX+d);else if(key==='ArrowUp')setOverlay('shiftY',ov.shiftY-d);else setOverlay('shiftY',ov.shiftY+d);return}
   if(key===' '){e.preventDefault();toggle()}
   else if(key==='ArrowLeft'||key==='ArrowRight'){e.preventDefault();const dir=key==='ArrowLeft'?-1:1;if(e.shiftKey)stepSample(dir);else setTouchTime(t+dir*100)}
   else if(key===','||key==='<')jumpStart(-1);else if(key==='.'||key==='>')jumpStart(1);
-  else if(key==='[')setOffset(offsetMs-1);else if(key===']')setOffset(offsetMs+1);else if(key==='{')setOffset(offsetMs-10);else if(key==='}')setOffset(offsetMs+10);
+  else if(key==='[')setOffset(syncMs-1);else if(key===']')setOffset(syncMs+1);else if(key==='{')setOffset(syncMs-10);else if(key==='}')setOffset(syncMs+10);
   else if(key==='f'||key==='F')toggleFullscreen();else if(key==='m'||key==='M')doc('muteBtn').click();
-  else if(key==='a'||key==='A')setAlignMode(!alignMode);else if(key==='s'||key==='S')doc('tapPickNear').click();else if(key==='Escape'&&alignMode)setAlignMode(false);
+  else if(key==='a'||key==='A')setAlignMode(!alignMode);else if(key==='s'||key==='S')doc('tapPickNear').click();else if(key==='p'||key==='P')setPickMode(!pickMode);
+  else if(key==='h'||key==='H')doc('showHints').click();else if(key==='Escape'){if(pickMode)setPickMode(false);else if(alignMode)setAlignMode(false)}
 });
 
 window.addEventListener('resize',draw);
-restoreState();updateLinkUI();updateAnchorsUI();draw();requestAnimationFrame(frame);recInit();
+restoreState();updateLinkUI();updateAnchorsUI();updateBeatInfo();updateLagUI();draw();requestAnimationFrame(frame);recInit();
 </script></body></html>
