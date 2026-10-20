@@ -16,6 +16,8 @@ from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 import argparse, collections, datetime, json, os, re, subprocess, sys, tempfile, threading, time, webbrowser
 
+import ai_bridge
+
 HERE = Path(__file__).resolve().parent
 # In the repository, captures go next to the other data; in a standalone viewer folder, next to this script
 CAPTURE_DIR = HERE.parent / 'data' / 'captures' if (HERE.parent / 'data').is_dir() else HERE / 'captures'
@@ -354,6 +356,8 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json(capture.status())
         if url.path == '/api/device':
             return self._json(device_info())
+        if url.path == '/api/ai/config':
+            return self._json(ai_bridge.public_config())
         if url.path == '/api/device/screenshot':
             png, err = device_screenshot()
             if not png:
@@ -381,6 +385,25 @@ class Handler(SimpleHTTPRequestHandler):
             return
         self._json({'error': 'not found'}, 404)
 
+    def _ai(self, action, body):
+        try:
+            if action == 'config':
+                return self._json(ai_bridge.public_config(ai_bridge.update_config(body)))
+            if action == 'detect':
+                return self._json(ai_bridge.detect(body.get('kind'), body.get('folder') or None))
+            if action == 'pick-folder':
+                return self._json({'folder': ai_bridge.pick_folder(str(body.get('title') or 'フォルダを選ぶ'))})
+            if action == 'models':
+                return self._json({'models': ai_bridge.list_models(body.get('kind'))})
+            if action == 'ask':
+                system, prompt = body.get('system'), body.get('prompt')
+                if not isinstance(system, str) or not isinstance(prompt, str) or not prompt.strip():
+                    return self._json({'error': '質問が空です'}, 400)
+                return self._json(ai_bridge.ask(system, prompt, body.get('provider')))
+        except ai_bridge.AIError as e:
+            return self._json({'error': str(e)}, 502)
+        return self._json({'error': 'not found'}, 404)
+
     def do_POST(self):
         url = urlparse(self.path)
         if not self._api_allowed():
@@ -392,6 +415,8 @@ class Handler(SimpleHTTPRequestHandler):
                 body = {}
         except ValueError:
             return self._json({'error': 'bad request'}, 400)
+        if url.path.startswith('/api/ai/'):
+            return self._ai(url.path[8:], body)
         if url.path == '/api/captures/rename':
             name = str(body.get('name') or '')
             if not NAME_RX.match(name):

@@ -16,7 +16,7 @@ embedded={'name':args.title,'source':args.jsonl.name,'startedAt':log['zero'].iso
 html=(SOURCE/'viewer_template.html').read_text('utf-8').replace('__TOUCH_DATA__',json.dumps(embedded,ensure_ascii=False,separators=(',',':')).replace('</','<\\/'))
 out=VIEWER/'arcaea_touch_video_sync.html';out.write_text(html,encoding='utf8',newline='\n')
 # Local server (viewer + USB recorder) and its capture worker are maintained as real files; copy them byte for byte
-for name in ['launch_viewer.py','touch_oslog.py']:
+for name in ['launch_viewer.py','touch_oslog.py','ai_bridge.py']:
     (VIEWER/name).write_bytes((SOURCE/name).read_bytes())
 launcher='''@echo off
 setlocal
@@ -32,6 +32,9 @@ if errorlevel 1 pause
 readme='''Arcaea Touch Studio — 使い方
 
 1. start_viewer.bat をダブルクリック（黒い画面は閉じずに置いておく）。
+   画面は左が映像、右が作業ごとのタブ（📥準備 / ⏱同期 / 🖐表示 / 🎵曲 / 🎯判定 / 🤖AI / ⬇書き出し / ？使い方）。
+   タブはキー 1〜8 でも切り替えられる。タブの上の「次は: …」を押すと、次にやることのタブが開く。
+   ウィンドウが狭いとタブは画面の下に出る。開いているタブをもう一度押すと畳んで映像を大きくできる。
 
 ■ iPadのタッチを記録する（USB接続・デベロッパモード有効のiPad）
   a. 右上の「タッチを記録（iPad・USB）」で接続中のiPadが表示されているか確認。
@@ -45,7 +48,7 @@ readme='''Arcaea Touch Studio — 使い方
     ローカル動画を読み込んだときは動画からも読み、「0. タッチデータ」の表示名の下に候補を出す。
 
 ■ 動画と重ねる
-2. ブラウザが開いたら、譜面動画ファイル（MP4など）を画面にドラッグ＆ドロップするか、右側の「ローカル動画」で選択。
+2. ブラウザが開いたら、譜面動画ファイル（MP4など）を画面にドラッグ＆ドロップするか、「📥 準備」タブの「ローカル動画」で選択。
    YouTubeを使う場合は「YouTube」タブでURLを貼り付けて「読込」。
    別のプレイのタッチログ（.jsonl）も、画面へのドロップか「0. タッチデータ」→「JSONLを開く」で読み込める。
 3. 映像のすぐ下の「同期」バーで、動画を最初のノーツを叩く瞬間で止めて「ここが譜面の開始」（最後のノーツで「譜面の終了」も押すとより確実）。
@@ -73,6 +76,15 @@ readme='''Arcaea Touch Studio — 使い方
     「見本を出す」で見本を流し、「見た目を元に戻す」で既定値に戻る。
   どれも書き出す動画に入る。
 
+■ AIサポート（「AIサポート（配置・連打の判断とアドバイス）」）
+  自動では決めにくい「区間ごとの音価（何分の配置か）」と「連打として数えるまとまり」をAIに判断させる。アドバイスや質問もできる。
+  「AIの設定」で使うAIを選ぶ:
+    Claude Code / Codex: インストール先のフォルダを選ぶだけで実行ファイルを探す（「自動で探す」でいつもの場所から）。ログイン済みのアカウントで動く。
+    Anthropic API / OpenAI互換API: APIキー（このPCの ~/.arcaea_touch_studio/ai.json にだけ保存）とモデル。
+    LM Studio / Ollama: アプリでローカルサーバーを起動しておく。モデルは「一覧」から選べる。
+  「🎼 配置と連打を判断してもらう」→ 提案を見て「この調整を使う」。判定の線と連打の番号が、その区間だけAIの判断に変わる。
+  「調整を消して自動に戻す」でいつでも戻せる。調整は同期設定と一緒に保存される。
+
 ■ 動画を書き出す（「4. 動画を書き出す」）
   ローカル動画にタッチを重ねたMP4（未対応のブラウザではWebM）を作る。等倍速で再生しながら録画するので、長さと同じだけ時間がかかる。
   書き出し中はこの画面を表示したままにする（隠れているとコマが描かれない）。Escで中止。
@@ -93,6 +105,6 @@ YouTube APIの制約で、APIキーなしの検索結果をアプリ内に直接
 BUILD.mkdir(exist_ok=True)
 zipout=BUILD/'arcaea_touch_video_sync.zip'
 with zipfile.ZipFile(zipout,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
- for name in ['arcaea_touch_video_sync.html','start_viewer.bat','launch_viewer.py','touch_oslog.py','使い方.txt']:
+ for name in ['arcaea_touch_video_sync.html','start_viewer.bat','launch_viewer.py','touch_oslog.py','ai_bridge.py','使い方.txt']:
   z.write(VIEWER/name,arcname=name)
 print({x.name:x.stat().st_size for x in [out,zipout,VIEWER/'start_viewer.bat']})

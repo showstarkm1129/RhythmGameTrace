@@ -12,13 +12,25 @@ h1{font-size:25px;margin:0 0 5px;letter-spacing:-.02em}h1 span{font-size:14px;co
 h2{font-size:16px;margin:0 0 11px}p{line-height:1.6;margin:5px 0;color:var(--sub)}
 .sub{color:var(--sub)}.small{font-size:12px}
 .chip{border:1px solid #3e6473;color:#a9f2f4;border-radius:100px;padding:6px 11px;font-size:12px;white-space:nowrap}
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 392px;gap:14px;align-items:start}
+/* The tool dock stays beside the video: one task page at a time, scrolled on its own */
+.side{position:sticky;top:10px;max-height:calc(100vh - 20px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:13px;background:rgba(14,26,41,.97);overflow:hidden}
+.dock-tabs{flex-shrink:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:8px;border-bottom:1px solid #2c4057;background:#0f1f33}
+.dock-tabs button{position:relative;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px;font-size:12px;line-height:1.25}
+.dock-tabs button span:first-child{font-size:15px}.dock-tabs button.selected{background:#1d4a63;border-color:#6cdbeb;color:#fff}
+.dock-tabs .badge{position:absolute;top:2px;right:3px;font-size:9.5px;line-height:1.4;padding:0 4px;border-radius:7px;background:#2f6f86;color:#fff;font-variant-numeric:tabular-nums}
+.dock-tabs .badge.rec{background:#c8455f}.dock-tabs .badge.ok{background:#2f8a64}.dock-tabs .badge.wait{background:#a5832c}
+.dock-next{flex-shrink:0;margin:8px 8px 0;padding:6px 9px;border:1px dashed #6cdbeb;border-radius:8px;font-size:12px;text-align:left;color:#bff4fb;background:#12304a}
+.dock-body{overflow-y:auto;padding:10px 10px 2px;flex:1;min-height:0;overscroll-behavior:contain}
+.dock-page{display:none}.dock-page.on{display:block}
+/* Grid and flex children default to their content's width; long file names or select options must not widen the dock */
+.dock-body .stack>*,.dock-body .inputline>*,.dock-body .two>*{min-width:0}.dock-body select{max-width:100%}.dock-body{overflow-x:hidden}.dock-body .panel{margin-bottom:10px;padding:12px}
 .panel{border:1px solid var(--line);border-radius:13px;padding:15px;background:rgba(20,34,53,.95);margin-bottom:14px}
 .secondary{background:#101d2f}.stack{display:grid;gap:11px}
 .line{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
 .between{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 button,input,select{font:inherit}
-button,select,input[type=text],input[type=number],input[type=url]{background:#22364b;border:1px solid #456079;border-radius:7px;padding:8px 9px;color:var(--text);min-width:0}
+button,select,textarea,input[type=text],input[type=number],input[type=url],input[type=password]{background:#22364b;border:1px solid #456079;border-radius:7px;padding:8px 9px;color:var(--text);min-width:0}
 button{cursor:pointer;transition:background .15s}button:hover{background:#34526b}button:disabled{opacity:.45;cursor:not-allowed}
 .primary{background:#16718b;border-color:#40adca;font-weight:750}.primary:hover{background:#16839f}
 .quiet{background:#17283d}.full{width:100%}
@@ -113,11 +125,19 @@ kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
 .opt-row{display:grid;grid-template-columns:118px 84px minmax(0,1fr);gap:8px;align-items:center}.opt-row+.opt-row{margin-top:8px}
 .opt-row label{font-size:12px;font-weight:650;color:#d9ecf7}.opt-row input{padding:5px 7px;font:12px ui-monospace,monospace;text-align:right;width:100%}.opt-row .small{margin:0;line-height:1.45}
 .sec-title{font-size:13px;font-weight:700;color:#d9f3ff;margin:14px 0 8px;border-top:1px solid #2c4057;padding-top:10px}
+.ai-answer{white-space:pre-wrap;font-size:12.5px;line-height:1.65;background:#132235;border:1px solid #2c4057;border-radius:8px;padding:10px 11px;max-height:460px;overflow:auto}
+.ai-prop{border:1px solid #3d6a8a;border-radius:8px;padding:9px 10px;background:#14273b;font-size:12px}.ai-prop h4{margin:8px 0 4px;font-size:12px;color:#d9f3ff}.ai-prop h4:first-child{margin-top:0}
+.ai-prop ul{margin:0;padding-left:16px}.ai-prop li{margin:2px 0;line-height:1.45}.ai-prop .why{color:#a1b5c8}
 .fx-grid{display:grid;grid-template-columns:76px minmax(0,1.35fr) minmax(0,1fr) minmax(0,1fr);gap:6px 8px;align-items:center;font-size:12px}.fx-grid b{font-size:11px;color:#a1b5c8;font-weight:600}.fx-grid select{padding:4px 5px;font-size:12px;min-width:0}
 .fx-grid .unit{display:flex;align-items:center;gap:3px;color:#a1b5c8}.fx-grid .unit input{width:100%;min-width:0;padding:4px 6px;font:12px ui-monospace,monospace;text-align:right}
 .exp-bar{height:8px;border-radius:4px;background:#0f1c2b;border:1px solid #2c4057;overflow:hidden}.exp-bar div{height:100%;width:0;background:linear-gradient(90deg,#16718b,#71e3b0)}
-@media(max-width:1100px){.layout{grid-template-columns:1fr}.side{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.side .panel{margin:0}.side .wide{grid-column:1/-1}}
-@media(max-width:650px){main{padding:13px 9px 36px}h1{font-size:21px}.panel{padding:11px}.side{grid-template-columns:1fr}.side .wide{grid-column:auto}.badges{grid-template-columns:repeat(2,1fr)}.step-row{grid-template-columns:repeat(3,1fr)}.anchor-row{grid-template-columns:1fr}}
+/* Narrow windows: the dock becomes a sheet fixed to the bottom, so the video above stays in view; the open tab folds it */
+@media(max-width:1100px){.layout{grid-template-columns:1fr}main{padding-bottom:calc(46vh + 24px)}
+.side{position:fixed;left:0;right:0;bottom:0;top:auto;max-height:46vh;z-index:40;border-radius:13px 13px 0 0;box-shadow:0 -10px 28px #000a}
+.side.min .dock-body,.side.min .dock-next{display:none}body.dock-min main{padding-bottom:84px}
+.dock-tabs{display:flex;overflow-x:auto;padding:6px;gap:4px}.dock-tabs button{flex:1 0 60px;font-size:11px;padding:3px 1px}.dock-tabs button span:first-child{font-size:13px}.dock-next{margin:6px 6px 0;padding:4px 8px}
+.stage{width:min(100%,max(300px,calc((54vh - 120px)*1194/834)))}body.dock-min .stage{width:min(100%,max(300px,calc((100vh - 260px)*1194/834)))}}
+@media(max-width:650px){main{padding:13px 9px 36px}h1{font-size:21px}.panel{padding:11px}.badges{grid-template-columns:repeat(2,1fr)}.step-row{grid-template-columns:repeat(3,1fr)}.anchor-row{grid-template-columns:1fr}}
 </style></head><body><main>
 <header><div><h1>Arcaea Touch Studio <span id="titleSub"></span></h1><p>実測タッチデータ × 動画重ね合わせ × ミリ秒単位の時間同期</p></div><div class="line"><span class="chip rec-chip hidden" id="recChip">● REC</span><span class="chip" id="dataChip"></span></div></header>
 <div class="layout"><section>
@@ -141,11 +161,11 @@ kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
 <div class="between"><span class="small sub">表示中の接触ID：<span id="touchIds">—</span></span><span class="small sub">座標：<span id="position">—</span></span></div>
 </div>
 
-<div class="panel secondary"><div class="between" style="margin-bottom:10px"><h2 style="margin:0">表示調整・位置合わせ</h2><label class="small sub"><input id="autoFit" type="checkbox" checked> iPad画面を動画の映像範囲（黒帯を除く）に自動で合わせる</label></div>
-<div class="stack" id="overlayRows"></div>
-<div class="between" style="margin-top:10px"><span class="small sub">細かい合わせ込みは「✥ 位置合わせ」：映像上をドラッグで移動、ホイールで拡大縮小（<kbd>Shift</kbd>で横だけ、<kbd>Alt</kbd>で縦だけ）、矢印キーで1px（<kbd>Shift</kbd>で10px）。</span><button id="resetOverlay">リセット</button></div></div>
-</section><aside class="side">
-
+</section><aside class="side" id="dock">
+<nav class="dock-tabs" id="dockTabs"><button data-tab="prep" title="準備（1）"><span>📥</span><span>準備</span><span class="badge hidden" id="tb-prep"></span></button><button data-tab="sync" title="同期（2）"><span>⏱</span><span>同期</span><span class="badge hidden" id="tb-sync"></span></button><button data-tab="view" title="表示（3）"><span>🖐</span><span>表示</span><span class="badge hidden" id="tb-view"></span></button><button data-tab="song" title="曲（4）"><span>🎵</span><span>曲</span><span class="badge hidden" id="tb-song"></span></button><button data-tab="taps" title="判定（5）"><span>🎯</span><span>判定</span><span class="badge hidden" id="tb-taps"></span></button><button data-tab="ai" title="AI（6）"><span>🤖</span><span>AI</span><span class="badge hidden" id="tb-ai"></span></button><button data-tab="export" title="書き出し（7）"><span>⬇</span><span>書き出し</span><span class="badge hidden" id="tb-export"></span></button><button data-tab="help" title="使い方（8）"><span>？</span><span>使い方</span><span class="badge hidden" id="tb-help"></span></button></nav>
+<button class="dock-next hidden" id="dockNext"></button>
+<div class="dock-body" id="dockBody">
+<div class="dock-page" data-page="prep">
 <div class="panel" id="recPanel"><div class="between" style="margin-bottom:10px"><h2 style="margin:0">タッチを記録（iPad・USB）</h2><button id="recDeviceBtn" class="quiet" style="padding:4px 8px;font-size:11px">接続確認</button></div>
 <div id="recUnavailable" class="hidden"><p class="small" style="margin:0"><code>start_viewer.bat</code>（または <code>py launch_viewer.py</code>）で開くと、ここからiPadのタッチ記録を開始・終了できる。</p></div>
 <div id="recControls" class="stack hidden">
@@ -159,7 +179,6 @@ kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
 <div class="inputline"><select id="recList" style="flex:1"><option value="">（記録したファイル）</option></select><button id="recOpen">開く</button><button id="recRename" title="選んだファイルの名前を変える">✎ 名前</button></div>
 <p class="small" style="margin:0">記録開始から「記録中」になるまで10〜15秒ほどかかる（iPadとの接続を確立するため）ので、表示が変わってからプレイしてね。終了ボタンを押すと、指が離れるのを少し待ってから保存し、自動でこのビューアに読み込む。</p>
 </div></div>
-
 <div class="panel"><h2>0. タッチデータ</h2><div class="stack">
 <div class="field"><label for="dataTitle">表示名</label><input id="dataTitle" type="text"></div>
 <div class="sugg hidden" id="dataSugg"></div>
@@ -167,13 +186,13 @@ kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
 <div class="two"><button id="openData">JSONLを開く</button><button id="resetData" class="quiet">埋め込みデータに戻す</button></div><input id="dataFile" type="file" class="hidden" accept=".jsonl,.json,.txt,.log">
 <p class="small" style="margin:0">取得コマンドで保存したJSONL（oslog --format json）をそのまま読める。画面にドラッグ＆ドロップしてもOK。読み込んだデータはこのブラウザに保存される。</p>
 <div class="status hidden" id="dataStatus"></div></div></div>
-
 <div class="panel"><h2>1. 動画を読み込む</h2><div class="tabs"><button id="tabLocal" class="selected">▣ ローカル動画</button><button id="tabYT">▶ YouTube</button></div>
 <div id="ytPanel" class="stack hidden"><div class="field"><label for="ytSearch">YouTubeで譜面を検索</label><div class="inputline"><input type="text" id="ytSearch" value="Arcaea Cataclysm Cry INS chart view" placeholder="譜面名など"><button id="searchYT">検索 ↗</button></div></div><p class="small">YouTubeの検索結果が新しいタブで開くよ。動画のURLをコピーして下に貼り付ければ、この画面の背景で再生できる。</p>
 <div class="field"><label for="ytUrl">YouTube動画のURL または動画ID</label><div class="inputline"><input type="text" id="ytUrl" value="https://www.youtube.com/watch?v=WzXKOxGYWBU" placeholder="https://youtu.be/..."><button id="loadYT" class="primary">読込</button></div></div><button id="pasteYT" class="full quiet">クリップボードのURLを貼り付けて読込</button><p class="small warn">YouTubeの検索結果をアプリ内に直接表示するには外部APIが必要。現バージョンは検索タブから選ぶ方式です。動画によっては埋め込みが禁止されている場合があります。</p></div>
 <div id="localPanel" class="stack"><label class="label" for="localFile">MP4 / WebMなどを選ぶ</label><input type="file" accept="video/*,.mp4,.mov,.webm,.m4v" id="localFile" style="width:100%"><p class="small">動画はサーバーへアップロードしません。ファイルを選択するか、画面のどこかにドラッグ＆ドロップしてね。</p><div class="status" id="localFileName">未選択</div></div>
 <div id="mediaStatus" class="status" style="margin-top:11px">動画未読込。ローカル動画ファイルを選ぶか、画面にドラッグ＆ドロップしてね。</div></div>
-
+</div>
+<div class="dock-page" data-page="sync">
 <div class="panel wide"><h2>2. 時間同期</h2>
 <div class="between"><span class="linkstate" id="linkState">連動中</span><button id="linkToggle" class="quiet" style="padding:6px 10px;font-size:12px">切り離す</button></div>
 <p class="small" style="margin-top:8px">譜面の開始で合わせる操作は、映像のすぐ下の「同期」バーで行う。ここでは結果のオフセットを数値で確認・微調整できる。</p>
@@ -195,7 +214,13 @@ kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
 <button id="syncAnchors" class="primary full" style="margin-top:9px">基準点を一致させる</button>
 </details>
 <p class="tip">例えば動画の0:12.500がタッチログの0:03.000に対応するなら、動画の基準点を12.500秒、タッチの基準点を3.000秒にして同期。オフセットは <strong>−9500ms</strong> になる。</p></div>
-
+</div>
+<div class="dock-page" data-page="view">
+<div class="panel secondary"><div class="between" style="margin-bottom:10px"><h2 style="margin:0">表示調整・位置合わせ</h2><label class="small sub"><input id="autoFit" type="checkbox" checked> iPad画面を動画の映像範囲（黒帯を除く）に自動で合わせる</label></div>
+<div class="stack" id="overlayRows"></div>
+<div class="between" style="margin-top:10px"><span class="small sub">細かい合わせ込みは「✥ 位置合わせ」：映像上をドラッグで移動、ホイールで拡大縮小（<kbd>Shift</kbd>で横だけ、<kbd>Alt</kbd>で縦だけ）、矢印キーで1px（<kbd>Shift</kbd>で10px）。</span><button id="resetOverlay">リセット</button></div></div>
+</div>
+<div class="dock-page" data-page="song">
 <div class="panel wide"><h2>3. 曲の設定（BPM・曲の遅れ）</h2>
 <div class="opt-row"><label for="bpmInput">BPM</label><input id="bpmInput" type="number" min="20" max="999" step="0.01" placeholder="例 180"><div class="line"><select id="beatsPerBar" style="padding:5px 7px"><option value="2">2拍子</option><option value="3">3拍子</option><option value="4" selected>4拍子</option><option value="5">5拍子</option><option value="6">6拍子</option><option value="7">7拍子</option></select><button id="bpmTap" style="padding:5px 8px;font-size:12px" title="曲に合わせて4回以上クリックするとBPMを測る">タップで測る</button></div></div>
 <div class="opt-row"><label for="beatShift">小節の頭のずれ</label><input id="beatShift" type="number" step="1" value="0"><div class="line"><span class="small sub">ms</span><button id="beatHere" style="padding:5px 8px;font-size:12px" title="今の動画時刻が小節の頭（1拍目）になるようにずらす">今の動画時刻を小節の頭に</button></div></div>
@@ -205,7 +230,8 @@ kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
 <div class="opt-row"><label for="listenLag">聞く環境の遅延</label><input id="listenLag" type="number" min="0" max="2000" step="1" value="0"><p class="small">ms。今このPCで使っているイヤホンなどの遅延。その分、曲を遅らせる量を減らす（撮影と同じイヤホンなら撮影環境と同じ値にすると、曲は遅らせない）。このブラウザだけに保存。</p></div>
 <div class="status" id="extraInfo" style="margin-top:8px"></div>
 <p class="small">タッチは映像に合わせて同期するので、ここでは動かさない。直すのは曲と映像（ノーツ）のずれだけ。ローカル動画のみ（YouTubeの音声は遅らせられない）。</p></div>
-
+</div>
+<div class="dock-page" data-page="taps">
 <div class="panel wide"><h2>タップの見え方（判定・連打の数）</h2>
 <div class="opt-row"><label><input id="hideShort" type="checkbox" checked> 短いタッチは軌跡なし</label><input id="shortMs" type="number" min="0" max="2000" step="10" value="150"><p class="small">ms 未満で離したタッチ（ふつうのタップ）は軌跡を描かず、指の丸と判定だけ出す。速いタップは少し滑っていても消す。ホールドやアークの軌跡は今まで通り。</p></div>
 <div class="sec-title">タイミングの判定</div>
@@ -224,7 +250,38 @@ kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
 </div>
 <div class="line" style="margin-top:8px"><button id="fxSample" style="padding:5px 8px;font-size:12px" title="映像の中央に緑・赤・水色の見本を3回出す">▶ 見本を出す</button><button id="fxReset" class="quiet" style="padding:5px 8px;font-size:12px">見た目を元に戻す</button><span class="small sub">大きさは iPad 画面の座標で、書き出す動画でも同じ比率になる。</span></div>
 </div>
-
+</div>
+<div class="dock-page" data-page="ai">
+<div class="panel wide" id="aiPanel"><h2>AIサポート（配置・連打の判断とアドバイス）</h2>
+<p id="aiUnavailable" class="small hidden" style="margin:0"><code>start_viewer.bat</code>（または <code>py launch_viewer.py</code>）で開くと使える。AIへの問い合わせはこのPCのサーバーから行う。</p>
+<div id="aiControls" class="stack hidden">
+<details id="aiSetup"><summary class="small">AIの設定（今: <b id="aiProvLabel">—</b>）</summary><div class="stack" style="margin-top:8px">
+<div class="field"><label for="aiProvider">使うAI</label><select id="aiProvider"><option value="claude-code">Claude Code（CLI・ログイン済みのアカウントで）</option><option value="codex">Codex（CLI・ログイン済みのアカウントで）</option><option value="anthropic">Anthropic API（APIキー）</option><option value="openai">OpenAI互換API（APIキー・URL）</option><option value="lmstudio">LM Studio（このPCのローカルAI）</option><option value="ollama">Ollama（このPCのローカルAI）</option></select></div>
+<div id="aiCli" class="stack">
+<div class="field"><label for="aiFolder">インストール先のフォルダ</label><div class="inputline"><input id="aiFolder" type="text" placeholder="例 C:\Users\あなた\AppData\Roaming\npm"><button id="aiPick" title="フォルダを選ぶと、中の実行ファイルを自動で探す">📁 選ぶ</button><button id="aiAuto" title="PATH・npm・~/.local/bin などから探す">自動で探す</button></div></div>
+<div class="field"><label for="aiExe">見つかった実行ファイル</label><select id="aiExe"><option value="">（フォルダを選ぶと探す）</option></select></div>
+</div>
+<div id="aiApi" class="stack">
+<div class="field" id="aiBaseRow"><label for="aiBase">サーバーのURL</label><input id="aiBase" type="url"></div>
+<div class="field" id="aiKeyRow"><label for="aiKey">APIキー（このPCにだけ保存）</label><div class="inputline"><input id="aiKey" type="password" autocomplete="off"><button id="aiKeyClear" class="quiet">消す</button></div></div>
+</div>
+<div class="field"><label for="aiModel">モデル（空欄なら既定）</label><div class="inputline"><input id="aiModel" type="text" list="aiModels"><datalist id="aiModels"></datalist><button id="aiListModels" title="使えるモデルの一覧を取る">一覧</button></div></div>
+<div class="line"><button id="aiTest">接続テスト</button><span class="small sub" id="aiCfgPath"></span></div>
+<div class="status hidden" id="aiSetupStatus"></div>
+</div></details>
+<div class="two"><div class="field"><label for="aiScope">AIに渡す範囲</label><select id="aiScope"><option value="chart">譜面の範囲（全体）</option><option value="near">今の位置の前後20秒</option></select></div><div class="field"><label>渡すデータ</label><span class="small sub" id="aiSize">—</span></div></div>
+<div class="two"><button id="aiAdjust" class="primary" title="区間ごとの音価（何分の配置か）と、連打として数えるまとまりをAIに判断してもらう">🎼 配置と連打を判断してもらう</button><button id="aiAdvice" title="ずれ・指の位置・軌跡・まとまりを合わせて練習のアドバイスをもらう">💬 アドバイスをもらう</button></div>
+<div class="inputline"><input id="aiQuestion" type="text" placeholder="質問（例: 40小節目からのトリルが遅れる理由は？）"><button id="aiAsk">送る</button></div>
+<div class="status hidden" id="aiStatus"></div>
+<div id="aiProposal" class="ai-prop hidden"></div>
+<div id="aiAnswer" class="ai-answer hidden"></div>
+<div class="sec-title">いま効いているAIの調整</div>
+<div class="status" id="aiPlanInfo"></div>
+<div class="line"><button id="aiPlanClear" class="quiet" style="padding:5px 8px;font-size:12px">調整を消して自動に戻す</button><span class="small sub">調整はこの動画の同期設定と一緒に保存される。</span></div>
+<details class="more"><summary>調整の中身を直接編集（JSON・時刻は動画のms）</summary><textarea id="aiPlanJson" rows="9" spellcheck="false" style="width:100%;margin-top:6px;font:11px/1.45 ui-monospace,monospace"></textarea><button id="aiPlanApply" style="margin-top:6px">この内容にする</button></details>
+</div></div>
+</div>
+<div class="dock-page" data-page="export">
 <div class="panel wide"><h2>4. 動画を書き出す</h2>
 <p class="small" style="margin-top:0">読み込んだローカル動画にタッチの跡を重ねた動画ファイルを作る。今の同期・オフセット・表示調整（不透明度・軌跡の長さ・ID表示・位置合わせ）とタップの見え方（判定・連打の数）がそのまま使われる。等倍速で再生しながら録画するので、書き出す長さと同じだけ時間がかかる。</p>
 <div class="two"><div class="field"><label for="exportRange">範囲</label><select id="exportRange"><option value="chart">譜面の範囲（開始3秒前〜終了3秒後）</option><option value="all">動画全体</option><option value="here">今の位置から最後まで</option></select></div><div class="field"><label for="exportSize">解像度（短い辺）</label><select id="exportSize"><option value="720">720p</option><option value="1080" selected>1080p</option><option value="src">元の解像度</option></select></div></div>
@@ -232,8 +289,11 @@ kbd{background:#233649;padding:1px 5px;border-radius:3px;font-size:11px}
 <button id="exportBtn" class="primary full">● 書き出し開始</button>
 <div class="exp-bar" style="margin-top:8px"><div id="exportProg"></div></div>
 <div class="status" id="exportStatus" style="margin-top:8px"></div></div>
-
+</div>
+<div class="dock-page" data-page="help">
 <div class="panel wide"><h2>使い方と注意</h2><p class="help">基本は動画を選んで ▶ 再生。指は映像の上に重なり、動画側の時計を基準に同期するよ。動画の範囲外（曲の前など）のタッチも、タイムラインやシークバーで移動すれば表示できる。</p><p class="help">ショートカット：<kbd>Space</kbd> 再生/一時停止、<kbd>←</kbd>/<kbd>→</kbd> 100ms移動、<kbd>Shift</kbd>+<kbd>←</kbd>/<kbd>→</kbd> 1記録ずつ移動、<kbd>,</kbd>/<kbd>.</kbd> 前/次のタッチ開始、<kbd>[</kbd>/<kbd>]</kbd> オフセット±1ms、<kbd>{</kbd>/<kbd>}</kbd> ±10ms、<kbd>S</kbd> 表示中のタップを選ぶ、<kbd>P</kbd> タッチから開始を決める、<kbd>A</kbd> 位置合わせ、<kbd>H</kbd> 操作ヒントの表示切替、<kbd>F</kbd> 全画面、<kbd>M</kbd> ミュート。映像エリアのクリックでも再生/一時停止できる。</p><p class="help">オフセット・基準点・表示調整・再生位置・読み込んだタッチデータはこのブラウザに自動保存され、次に開いたときに復元される。ローカル動画はブラウザの制約で自動では開けないので、前回と同じファイルを選び直してね。</p><p class="tip">実測ログの時刻はOSによる記録時刻であり、センサーの真の接触時刻と完全に一致するとは限りません。またログに抜けのある区間は、前後の座標を無理に補間しません。</p><p class="small">YouTubeはネット接続が必要。ブラウザの <code>file://</code> 直開きでは埋め込みが失敗する場合があるので、付属の <code>start_viewer.bat</code> で起動するのがおすすめ。</p></div>
+</div>
+</div>
 </aside></div>
 </main>
 <script>
@@ -356,7 +416,10 @@ function setDataSource(name){data.source=name;updateDataUI();try{const j=JSON.pa
 
 // ---------- media ----------
 function getYtID(v){v=(v||'').trim();if(/^[a-zA-Z0-9_-]{11}$/.test(v))return v;try{const u=new URL(v);let h=u.hostname.replace(/^www\./,'');if(h==='youtu.be')return u.pathname.slice(1).split('/')[0].match(/^[\w-]{11}$/)?.[0];if(['youtube.com','m.youtube.com','youtube-nocookie.com','music.youtube.com'].includes(h)){const candidate=u.searchParams.get('v')||u.pathname.match(/\/(?:embed|shorts|live|v)\/([\w-]{11})/)?.[1];if(candidate&&/^[\w-]{11}$/.test(candidate))return candidate}}catch(e){}return null}
-function mediaNow(){if(mediaMode==='local'&&localVideo.readyState>0)return localVideo.currentTime*1000;if(mediaMode==='youtube'&&youtubeReady&&youtubePlayer&&typeof youtubePlayer.getCurrentTime==='function'){try{return Math.max(0,youtubePlayer.getCurrentTime()*1000)}catch(e){}}return null}
+function mediaNow(){if(mediaMode==='local'&&localVideo.readyState>0)return localVideo.currentTime*1000;if(mediaMode==='youtube'&&youtubeReady&&youtubePlayer&&typeof youtubePlayer.getCurrentTime==='function'){try{return ytNow(Math.max(0,youtubePlayer.getCurrentTime()*1000))}catch(e){}}return null}
+// The YouTube player reports its time only every so often; while it plays, run on from the last new value (at most 1 s)
+let ytAnchor=null;
+function ytNow(v){const now=performance.now();if(youtubePlayerState!==1){ytAnchor=null;return v}if(!ytAnchor||v!==ytAnchor.v){ytAnchor={v,at:now};return v}return v+Math.min(1000,(now-ytAnchor.at)*+doc('speed').value)}
 function currentVideoDuration(){if(mediaMode==='local'&&Number.isFinite(localVideo.duration))return localVideo.duration*1000;if(mediaMode==='youtube'&&youtubeReady&&youtubePlayer){try{let d=youtubePlayer.getDuration();return d>0?d*1000:null}catch(e){}}return null}
 function mediaExists(){return mediaMode!=='none'}
 function mediaAspect(){if(mediaMode==='local'&&localVideo.videoWidth>0)return localVideo.videoWidth/localVideo.videoHeight;if(mediaMode==='youtube')return 16/9;return null}
@@ -442,7 +505,17 @@ localVideo.addEventListener('loadedmetadata',()=>{applyMediaPrefs();if(mismatchF
 localVideo.addEventListener('play',resumeMediaState);localVideo.addEventListener('pause',resumeMediaState);localVideo.addEventListener('ended',resumeMediaState);
 localVideo.addEventListener('error',()=>{if(mediaMode==='local'&&localVideo.getAttribute('src'))setStatus('動画ファイルを再生できません。ブラウザが対応するコーデック（H.264 MP4など）を使ってね。','warning')});
 // Learn the real frame duration while playing so the "1コマ" buttons step one video frame
-function watchFrames(){if(!('requestVideoFrameCallback' in localVideo))return;let last=null;const cb=(now,md)=>{if(last&&md.presentedFrames-last.frames===1){const d=(md.mediaTime-last.time)*1000;if(d>4&&d<frameMs-0.5)frameMs=d}last={frames:md.presentedFrames,time:md.mediaTime};if(mediaMode==='local')localVideo.requestVideoFrameCallback(cb)};localVideo.requestVideoFrameCallback(cb)}
+// Each new video frame: measure the frame rate and note the frame's time and when it is shown. While playing, the
+// touches use the time of the picture on screen, run on from the last shown frame (frameTimeAt), rather than the media
+// clock, which runs independently of the picture. Drawing inside the frame callbacks themselves (tried first) updated
+// the touches only at the video's frame rate and looked choppier
+let vfcGen=0,vfcLast=null;
+function watchFrames(){if(!('requestVideoFrameCallback' in localVideo))return;const gen=++vfcGen;let last=null;const cb=(now,md)=>{if(gen!==vfcGen)return;if(last&&md.presentedFrames-last.frames===1){const d=(md.mediaTime-last.time)*1000;if(d>4&&d<frameMs-0.5)frameMs=d}last={frames:md.presentedFrames,time:md.mediaTime};
+  vfcLast={at:now,mt:md.mediaTime*1000,exp:md.expectedDisplayTime};
+  if(mediaMode==='local')localVideo.requestVideoFrameCallback(cb)};localVideo.requestVideoFrameCallback(cb)}
+function frameClockLive(){return playing&&mediaMode==='local'&&linked&&!outside&&!exporting&&vfcLast!==null&&performance.now()-vfcLast.at<250}
+// Media time of the picture when what is drawn now reaches the screen (about one display frame later)
+function frameTimeAt(now){const d=now+16-vfcLast.exp;return vfcLast.mt+Math.max(-frameMs,Math.min(frameMs,d))*localVideo.playbackRate}
 
 // ---------- sync (link / anchors) ----------
 function updateLinkUI(){
@@ -461,7 +534,7 @@ function updateStageLabel(){
   else if(!linked){text='切り離し中：再生と「1コマ」は動画だけ、シークバー・タイムライン・「開始 ⏭」はタッチだけを動かす';cls='unlinked'}
   else if(outside){text='動画の範囲外：タッチだけを表示中（動画の範囲に入ると動画も動き出す）';cls='unlinked'}
   // The hints already cover the normal state; keep the top of the video clear
-  else text=doc('showHints').checked?'':'指の位置は記録上の座標 · 映像との位置合わせは下の「表示調整・位置合わせ」から';
+  else text=doc('showHints').checked?'':'指の位置は記録上の座標 · 映像との位置合わせは右の「🖐 表示」から';
   el.textContent=text;el.className='overlay-label'+(cls?' '+cls:'')+(text?'':' hidden');updateExportUI();updateLagUI();
 }
 function unlink(){if(!mediaExists()||!linked)return;if(playing)pause();linked=false;outside=false;updateLinkUI();draw()}
@@ -642,6 +715,26 @@ function groupOnsets(gapMax){
   return groups;
 }
 function nearestDev(x,step){return x-Math.round(x/step)*step}
+// Overrides from the AI (or edited by hand), on the video clock so they stay with the chart if the offset changes.
+// snap: the note value of a passage; runs: passages counted as one run; noCount: passages that get no numbers.
+// Only what they cover changes; the rest stays automatic
+let tapPlan={snap:[],runs:[],noCount:[]},planVer=0;
+const PLAN_DIVS=[4,8,12,16,24,32];
+function normPlan(p){
+  const rng=(a,extra)=>(Array.isArray(a)?a:[]).map(r=>({from:Math.round(+(r?.from??r?.from_ms)),to:Math.round(+(r?.to??r?.to_ms)),...extra(r||{}),reason:String(r?.reason||'').slice(0,240)})).filter(r=>Number.isFinite(r.from)&&Number.isFinite(r.to)&&r.to>=r.from).sort((a,b)=>a.from-b.from).slice(0,400);
+  return {snap:rng(p?.snap,r=>({div:+r.div})).filter(r=>PLAN_DIVS.includes(r.div)),runs:rng(p?.runs,()=>({})),noCount:rng(p?.noCount??p?.no_count,()=>({}))};
+}
+// A tap belongs to a range when its time is inside it; 20ms of slack so ranges given by tap times always catch them
+function inPlan(list,v){for(const r of list)if(v>=r.from-20&&v<=r.to+20)return r;return null}
+function setTapPlan(p,silent){tapPlan=normPlan(p);planVer++;tapCache=null;judgeInfoKey='';renderPlan();draw();if(!silent)persist()}
+// Onsets inside a planned run leave the automatic runs (splitting them) and form that run
+function planGroups(groups){
+  if(!tapPlan.runs.length)return groups;
+  const on=data.onsets,out=[],claimed=tapPlan.runs.map(()=>[]),push=(g,k)=>{if(g.on.length)g.iois.push(on[k].start-on[g.on[g.on.length-1]].start);g.on.push(k)};
+  for(const g of groups){let cur=null;for(const k of g.on){const r=inPlan(tapPlan.runs,on[k].start-offsetMs);if(r){claimed[tapPlan.runs.indexOf(r)].push(k);cur=null;continue}if(!cur){cur={on:[],iois:[]};out.push(cur)}push(cur,k)}}
+  for(const ks of claimed)if(ks.length){const g={on:[],iois:[],planned:true};ks.sort((a,b)=>a-b).forEach(k=>push(g,k));out.push(g)}
+  return out.sort((a,b)=>a.on[0]-b.on[0]);
+}
 // Lines per beat used to judge a run. Without the chart, a note's time is the nearest line of the BPM grid; the finer the
 // grid, the smaller the error it can still tell apart (half a line), so the grid is kept as coarse as the run allows:
 // the run's spacing picks the note value (1/16 trill, 1/12 triplets...) and its family (binary or ternary), the finest
@@ -653,20 +746,21 @@ function snapPlan(b,xs,iois){
   return (fam==='bin'?[1,2,4,8]:[1,3,6]).filter(d=>d<=finest);
 }
 function tapInfo(){
-  const b=beatLen(),snap=doc('snapDiv').value,key=[data.source,data.strokes.length,b,beatOrigin(),offsetMs,snap].join();
+  const b=beatLen(),snap=doc('snapDiv').value,key=[data.source,data.strokes.length,b,beatOrigin(),offsetMs,snap,planVer].join();
   if(tapCache&&tapCache.key===key)return tapCache;
-  const n=data.strokes.length,num=new Int32Array(n),dev=new Float64Array(n).fill(NaN),div=new Int8Array(n),on=data.onsets;
+  const n=data.strokes.length,num=new Int32Array(n),dev=new Float64Array(n).fill(NaN),div=new Int8Array(n),run=new Int32Array(n).fill(-1),on=data.onsets;
   // Without a BPM, runs are cut at 400ms pauses; with one, at pauses longer than a beat
-  for(const g of groupOnsets(b?b*1.1:400)){
-    g.on.forEach((k,j)=>{num[on[k].taps[0]]=j+1});
-    if(!b)continue;
+  const groups=planGroups(groupOnsets(b?b*1.1:400));
+  groups.forEach((g,gi)=>{
+    g.on.forEach((k,j)=>{for(const i of on[k].taps)run[i]=gi;if(!inPlan(tapPlan.noCount,on[k].start-offsetMs))num[on[k].taps[0]]=j+1});
+    if(!b)return;
     const taps=g.on.flatMap(k=>on[k].taps),xs=taps.map(i=>data.starts[i]-offsetMs-beatOrigin());
-    const chain=snap==='auto'?snapPlan(b,xs,g.iois):[+snap/4];
-    taps.forEach((i,j)=>{const fin=chain[chain.length-1],cap=b/fin/2;let d=fin,v=nearestDev(xs[j],b/fin);
+    const base=snap==='auto'?snapPlan(b,xs,g.iois):[+snap/4];
+    taps.forEach((i,j)=>{const sec=inPlan(tapPlan.snap,data.starts[i]-offsetMs),chain=sec?[sec.div/4]:base,fin=chain[chain.length-1],cap=b/fin/2;let d=fin,v=nearestDev(xs[j],b/fin);
       for(const c of chain){const w=nearestDev(xs[j],b/c);if(Math.abs(w)<=Math.min(b/c*0.3,cap)){d=c;v=w;break}}
       dev[i]=v;div[i]=d});
-  }
-  return tapCache={key,num,dev,div};
+  });
+  return tapCache={key,num,dev,div,run,groups};
 }
 function judgeOf(v){const w=+doc('judgeWin').value||25;return v<-w?1:v>w?2:0}
 function fmtDev(v){v=Math.round(v);return (v>=0?'+':'−')+Math.abs(v)+'ms'}
@@ -699,8 +793,13 @@ doc('fxSample').onclick=()=>{fxSample={t0:performance.now()};draw()};
 for(const id of [...Object.keys(TAP_VIEW),'snapDiv'])doc(id).addEventListener(TAP_VIEW[id]==='value'?'input':'change',()=>{judgeInfoKey='';draw();persist()});
 
 // ---------- song audio delay (recording lag − listening lag) ----------
-// The element's sound runs through Web Audio once a delay is needed: element -> play delay -> volume -> speakers, and
-// element -> export delay -> recorder. Created on first need; a media element can be captured only once
+// The element's sound runs through Web Audio: element -> play delay -> volume -> speakers, and element -> export delay
+// -> recorder. It is set up on the first play of a local video whatever the delay. It used to be set up only once a
+// delay was first needed, and since a media element cannot be released from Web Audio and the browser times its plain
+// output differently (it matches the picture to the output device's latency, Web Audio output it does not), the same
+// settings sounded different depending on whether a delay had ever been set (reported 2026-10-20: "0ms was off;
+// changing the listening lag and back fixed it"). A second, hidden player for the sound was tried instead and dropped:
+// each seek stalls a player for ~140ms, so keeping two in step needed constant corrections that made both choppy
 let audioGraph=null;
 const MAX_AUDIO_DELAY=5;
 function ensureAudioGraph(){
@@ -712,7 +811,7 @@ function ensureAudioGraph(){
 // Delay heard here, in real time: the recording's lead scales with playback speed; the earphones' lag does not
 function playDelayMs(){return Math.max(0,recLagMs/+doc('speed').value-listenLagMs)}
 function syncAudioGraph(){
-  if(!audioGraph&&mediaMode==='local'&&playDelayMs()>0)ensureAudioGraph();
+  if(!audioGraph&&mediaMode==='local'&&(playing||exporting))ensureAudioGraph();
   if(!audioGraph)return;
   const ac=audioGraph.ac;audioGraph.playDelay.delayTime.setTargetAtTime(Math.min(MAX_AUDIO_DELAY,playDelayMs()/1000),ac.currentTime,0.02);
   audioGraph.recDelay.delayTime.setTargetAtTime(Math.min(MAX_AUDIO_DELAY,recLagMs/1000),ac.currentTime,0.02);
@@ -980,7 +1079,7 @@ function draw(){
   doc('videoClock').textContent=v===null?'—':linked&&outside?fmt(t-offsetMs)+'（範囲外）':fmt(v);
   if(!seekDrag)seek.value=String(Math.max(minTime,Math.min(maxTime,Math.round(t))));
   doc('beatClock').textContent=beatLen()&&(mediaExists()||chartStartV!==null)?beatLabel(t-offsetMs):'—';
-  overlayDraw();drawTimeline();updateTapSelUI();updateHints();updateJudgeInfo();
+  overlayDraw();drawTimeline();updateTapSelUI();updateHints();updateJudgeInfo();updateDock();
 }
 function frame(now){
   if(!seekDrag){
@@ -989,7 +1088,7 @@ function frame(now){
       t=baseT+(now-baseClock)*Number(doc('speed').value);
       if(media){const vt=t-offsetMs,d=currentVideoDuration();if(vt>=0&&(d===null||vt<d)){outside=false;setVideoTime(vt);startVideo();updateStageLabel()}}
       const end=media?maxTime:data.duration;if(t>=end&&(!media||outside)){t=end;pause()}
-    }else if(media&&linked&&!outside){const v=mediaNow();if(v!==null)t=v+offsetMs}
+    }else if(media&&linked&&!outside){const v=frameClockLive()?frameTimeAt(now):mediaNow();if(v!==null)t=v+offsetMs}
   }
   if(now-lastDraw>15){draw();lastDraw=now}requestAnimationFrame(frame);
 }
@@ -1007,7 +1106,7 @@ function setAutoFit(on){autoFit=on;doc('autoFit').checked=on;draw()}
 doc('autoFit').onchange=e=>{setAutoFit(e.target.checked);persist()};
 doc('resetOverlay').onclick=()=>{for(const k of OVERLAY_KEYS)setOverlay(k,OVERLAY[k][0]);setAutoFit(true);persist()};
 for(const k of VIEW_KEYS)doc(k).onchange=()=>{updateStageLabel();draw();persist()};
-function setAlignMode(on){if(on&&pickMode)setPickMode(false);alignMode=on;doc('stage').classList.toggle('align',on);doc('alignBtn').classList.toggle('selected',on);doc('alignBtn').textContent=on?'✓ 位置合わせ中':'✥ 位置合わせ';updateStageLabel();draw()}
+function setAlignMode(on){if(on&&pickMode)setPickMode(false);if(on)setDock('view');alignMode=on;doc('stage').classList.toggle('align',on);doc('alignBtn').classList.toggle('selected',on);doc('alignBtn').textContent=on?'✓ 位置合わせ中':'✥ 位置合わせ';updateStageLabel();draw()}
 doc('alignBtn').onclick=()=>setAlignMode(!alignMode);
 doc('stage').addEventListener('pointerdown',e=>{if(!alignMode||e.button!==0)return;e.preventDefault();try{doc('stage').setPointerCapture(e.pointerId)}catch(err){}alignDrag={x:e.clientX,y:e.clientY,sx:ov.shiftX,sy:ov.shiftY,k:WIDTH/doc('touchCanvas').getBoundingClientRect().width}});
 doc('stage').addEventListener('pointermove',e=>{if(!alignDrag)return;setOverlay('shiftX',alignDrag.sx+(e.clientX-alignDrag.x)*alignDrag.k);setOverlay('shiftY',alignDrag.sy+(e.clientY-alignDrag.y)*alignDrag.k)});
@@ -1044,7 +1143,7 @@ doc('stage').addEventListener('dblclick',()=>{if(mediaExists()&&!alignMode&&!pic
 
 // ---------- settings file + auto-save ----------
 function downloadData(name,obj){let blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000)}
-function settingsSnapshot(){return {version:1,source:mediaMode==='none'?(currentTab==='yt'?'youtube':'local'):mediaMode,videoURL:doc('ytUrl').value,localVideo:localInfo,touchData:data.source,offsetMs:syncMs,recLagMs,bpm,beatsPerBar,beatShiftMs,snapDiv:doc('snapDiv').value,videoAnchorMs,touchAnchorMs,chartStartMs:chartStartV,chartEndMs:chartEndV,autoFit,overlay:{...ov}}}
+function settingsSnapshot(){return {version:1,source:mediaMode==='none'?(currentTab==='yt'?'youtube':'local'):mediaMode,videoURL:doc('ytUrl').value,localVideo:localInfo,touchData:data.source,offsetMs:syncMs,recLagMs,bpm,beatsPerBar,beatShiftMs,snapDiv:doc('snapDiv').value,tapPlan,videoAnchorMs,touchAnchorMs,chartStartMs:chartStartV,chartEndMs:chartEndV,autoFit,overlay:{...ov}}}
 function settingsFileName(){let base=localInfo?localInfo.name.replace(/\.[^.]+$/,''):getYtID(doc('ytUrl').value);base=(base||'settings').replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,60);return `arcaea_touch_sync_${base}.json`}
 doc('saveSettings').onclick=()=>downloadData(settingsFileName(),settingsSnapshot());
 function applySettings(j){
@@ -1055,7 +1154,7 @@ function applySettings(j){
   // Files saved before auto-fit existed were tuned against the whole stage, so keep that mapping for them
   setAutoFit(typeof j.autoFit==='boolean'?j.autoFit:false);
   const num=(v,d=0)=>Number.isFinite(v)?Math.round(v):d;recLagMs=Math.max(0,num(j.recLagMs));updateLagUI();
-  bpm=null;setBpm(j.bpm,true);beatsPerBar=[2,3,4,5,6,7].includes(j.beatsPerBar)?j.beatsPerBar:4;doc('beatsPerBar').value=String(beatsPerBar);beatShiftMs=num(j.beatShiftMs);doc('beatShift').value=beatShiftMs;doc('snapDiv').value=['8','12','16','24','32'].includes(String(j.snapDiv))?String(j.snapDiv):'auto';updateBeatInfo();
+  bpm=null;setBpm(j.bpm,true);beatsPerBar=[2,3,4,5,6,7].includes(j.beatsPerBar)?j.beatsPerBar:4;doc('beatsPerBar').value=String(beatsPerBar);beatShiftMs=num(j.beatShiftMs);doc('beatShift').value=beatShiftMs;doc('snapDiv').value=['8','12','16','24','32'].includes(String(j.snapDiv))?String(j.snapDiv):'auto';setTapPlan(j.tapPlan,true);updateBeatInfo();
   setOffset(j.offsetMs||0);if(j.source==='youtube')selectTab('yt');else if(j.source==='local')selectTab('local');
   // A local file cannot be reopened by the page itself; remember its name so the user knows which one to pick
   if(j.localVideo&&typeof j.localVideo.name==='string'){localInfo={name:j.localVideo.name,size:+j.localVideo.size||0};if(mediaMode!=='local')doc('localFileName').textContent='前回の動画: '+fileLabel(localInfo)+' — 同じファイルを選び直してね'}
@@ -1063,7 +1162,7 @@ function applySettings(j){
 async function loadSettingsFile(file){try{let j=JSON.parse(await file.text());applySettings(j);const other=j.touchData&&j.touchData!==data.source?` この設定はタッチデータ「${j.touchData}」用です。`:'';setStatus((j.localVideo?.name&&mediaMode!=='local'?`同期設定を復元しました。動画「${j.localVideo.name}」を選び直してね。`:'同期設定を復元しました。')+other,other?'warning':'good')}catch(err){setStatus('設定の読み込みに失敗: '+err.message,'warning')}}
 doc('loadSettings').onclick=()=>doc('settingsFile').click();doc('settingsFile').onchange=async e=>{let file=e.target.files?.[0];if(file)await loadSettingsFile(file);e.target.value=''};
 // Auto-save to this browser so a reload or restart does not lose the calibration
-function saveState(){clearTimeout(persistTimer);try{localStorage.setItem(STORE_KEY,JSON.stringify({...settingsSnapshot(),view:Object.fromEntries(VIEW_KEYS.map(k=>[k,doc(k).checked])),speed:doc('speed').value,volume:+doc('volume').value,muted,tlZoom:doc('tlZoom').value,dataTitle:data.name,syncBarCollapsed:doc('syncBar').classList.contains('collapsed'),listenLagMs,recTitle:doc('recTitle').value,recAutoTitle:doc('recAutoTitle').checked,tapView:Object.fromEntries(Object.entries(TAP_VIEW).map(([k,a])=>[k,doc(k)[a]])),t:Math.round(t)}))}catch(e){}}
+function saveState(){clearTimeout(persistTimer);try{localStorage.setItem(STORE_KEY,JSON.stringify({...settingsSnapshot(),view:Object.fromEntries(VIEW_KEYS.map(k=>[k,doc(k).checked])),speed:doc('speed').value,volume:+doc('volume').value,muted,tlZoom:doc('tlZoom').value,dataTitle:data.name,syncBarCollapsed:doc('syncBar').classList.contains('collapsed'),listenLagMs,dockTab,recTitle:doc('recTitle').value,recAutoTitle:doc('recAutoTitle').checked,tapView:Object.fromEntries(Object.entries(TAP_VIEW).map(([k,a])=>[k,doc(k)[a]])),t:Math.round(t)}))}catch(e){}}
 function persist(){if(restoring)return;clearTimeout(persistTimer);persistTimer=setTimeout(saveState,300)}
 function restoreState(){
   let saved=null;try{saved=JSON.parse(localStorage.getItem(DATA_KEY)||'null')}catch(e){}
@@ -1076,6 +1175,7 @@ function restoreState(){
     applySettings(j);
     if(typeof j.dataTitle==='string'&&j.dataTitle){data.name=j.dataTitle;doc('dataTitle').value=j.dataTitle;updateDataUI()}
     for(const k of VIEW_KEYS)if(typeof j.view?.[k]==='boolean')doc(k).checked=j.view[k];
+    if(DOCK_TABS.includes(j.dockTab))setDock(j.dockTab,false);
     if(typeof j.recTitle==='string')doc('recTitle').value=j.recTitle;if(typeof j.recAutoTitle==='boolean')doc('recAutoTitle').checked=j.recAutoTitle;
     for(const [k,a] of Object.entries(TAP_VIEW)){const v=j.tapView?.[k],el=doc(k);if(a==='checked'?typeof v==='boolean':el.tagName==='SELECT'?[...el.options].some(o=>o.value===v):v!==''&&Number.isFinite(+v))el[a]=v}
     if([...doc('speed').options].some(o=>o.value===j.speed))doc('speed').value=j.speed;
@@ -1242,6 +1342,160 @@ async function readVideoTitle(){
 }
 localVideo.addEventListener('loadeddata',()=>{if(mediaMode==='local')readVideoTitle()});
 
+// ---------- AI support (asked through launch_viewer.py: Claude Code / Codex CLI, Anthropic / OpenAI-compatible APIs) ----------
+const AI_NAMES={'claude-code':'Claude Code','codex':'Codex','anthropic':'Anthropic API','openai':'OpenAI互換API','lmstudio':'LM Studio','ollama':'Ollama'},AI_CLI=['claude-code','codex'];
+let aiCfg=null,aiBusy=false,aiPending=null;
+function setAiSetup(m,k=''){showMsg('aiSetupStatus',m,k)}
+async function aiInit(){
+  if(!/^https?:$/.test(location.protocol)){doc('aiUnavailable').classList.remove('hidden');return}
+  try{aiCfg=await api('/api/ai/config');doc('aiControls').classList.remove('hidden');aiRender();renderPlan();if(AI_CLI.includes(aiCfg.provider)&&!aiCfg[aiCfg.provider].exe&&!aiCfg[aiCfg.provider].folder)doc('aiSetup').open=true}
+  catch(e){doc('aiUnavailable').classList.remove('hidden')}
+}
+function aiRender(){
+  const k=aiCfg.provider,c=aiCfg[k],cli=AI_CLI.includes(k);
+  doc('aiProvider').value=k;doc('aiProvLabel').textContent=AI_NAMES[k]+(c.model?' · '+c.model:'');
+  doc('aiCli').classList.toggle('hidden',!cli);doc('aiApi').classList.toggle('hidden',cli);
+  doc('aiBaseRow').classList.toggle('hidden',!['openai','lmstudio','ollama'].includes(k));doc('aiKeyRow').classList.toggle('hidden',!['anthropic','openai'].includes(k));
+  if(cli){if(document.activeElement!==doc('aiFolder'))doc('aiFolder').value=c.folder;const sel=doc('aiExe');if(!c.exe){sel.replaceChildren(new Option(c.folder?'（「自動で探す」かフォルダを選び直す）':'（フォルダを選ぶと探す）',''))}else if(![...sel.options].some(o=>o.value===c.exe)){sel.replaceChildren(new Option(c.exe,c.exe))}sel.value=c.exe}
+  else{if(document.activeElement!==doc('aiBase'))doc('aiBase').value=c.base||'';doc('aiKey').value='';doc('aiKey').placeholder=c.hasKey?`保存済み（…${c.keyHint}）`+(c.keyFromEnv?'・環境変数':''):(k==='openai'?'sk-…（自前のサーバーなら空でもよい）':'sk-ant-…')}
+  if(document.activeElement!==doc('aiModel'))doc('aiModel').value=c.model||'';doc('aiModel').placeholder=k==='anthropic'?'claude-sonnet-5-5':cli?'空欄でCLIの既定':'空欄なら読み込み中の最初のモデル';
+  doc('aiCfgPath').textContent='設定: '+aiCfg.configPath;
+}
+async function aiSave(part){try{aiCfg=await api('/api/ai/config',{method:'POST',body:JSON.stringify(part)});aiRender()}catch(e){setAiSetup('設定を保存できません: '+e.message,'warning')}}
+const parentDir=p=>p.replace(/[\\/][^\\/]+$/,'');
+async function aiDetect(folder){
+  const kind=aiCfg.provider;setAiSetup(folder?`「${folder}」の中を探しています…`:'いつもの場所を探しています…');
+  try{const r=await api('/api/ai/detect',{method:'POST',body:JSON.stringify({kind,folder})}),sel=doc('aiExe');sel.replaceChildren();
+    if(!r.candidates.length){sel.append(new Option('（見つかりません）',''));setAiSetup(`${AI_NAMES[kind]} の実行ファイルが見つかりません`+(folder?'。インストール先（npm なら %APPDATA%\\npm、Claude Code なら %USERPROFILE%\\.local\\bin など）を選んでね。':'。フォルダを選んでね。'),'warning');return}
+    for(const c of r.candidates)sel.append(new Option(c.path+(c.version?' · '+c.version:' · 起動できない？'),c.path));
+    const best=r.candidates.find(c=>c.version)||r.candidates[0];
+    await aiSave({[kind]:{exe:best.path,folder:folder||parentDir(best.path)}});doc('aiExe').value=best.path;
+    setAiSetup(`見つかりました: ${best.path}`+(best.version?`（${best.version}）`:'（--version に答えない）'),best.version?'good':'warning')}
+  catch(e){setAiSetup('探せません: '+e.message,'warning')}
+}
+doc('aiProvider').onchange=e=>{aiSave({provider:e.target.value});doc('aiSetupStatus').classList.add('hidden')};
+doc('aiFolder').addEventListener('change',e=>{const f=e.target.value.trim().replace(/^"|"$/g,'');if(f)aiDetect(f)});
+doc('aiPick').onclick=async()=>{setAiSetup('フォルダを選ぶ画面を開いています（タスクバーに隠れていることがある）…');try{const r=await api('/api/ai/pick-folder',{method:'POST',body:JSON.stringify({title:`${AI_NAMES[aiCfg.provider]} のインストール先を選ぶ`})});if(r.folder){doc('aiFolder').value=r.folder;aiDetect(r.folder)}else setAiSetup('フォルダは選ばれませんでした。')}catch(e){setAiSetup(e.message,'warning')}};
+doc('aiAuto').onclick=()=>aiDetect(null);
+doc('aiExe').onchange=e=>{if(e.target.value)aiSave({[aiCfg.provider]:{exe:e.target.value}})};
+doc('aiModel').addEventListener('change',e=>aiSave({[aiCfg.provider]:{model:e.target.value}}));
+doc('aiBase').addEventListener('change',e=>aiSave({[aiCfg.provider]:{base:e.target.value}}));
+doc('aiKey').addEventListener('change',e=>{if(e.target.value.trim())aiSave({[aiCfg.provider]:{key:e.target.value}})});
+doc('aiKeyClear').onclick=()=>aiSave({[aiCfg.provider]:{key:'',clearKey:true}});
+doc('aiListModels').onclick=async()=>{setAiSetup('モデルの一覧を取っています…');try{const r=await api('/api/ai/models',{method:'POST',body:JSON.stringify({kind:aiCfg.provider})});doc('aiModels').replaceChildren(...r.models.map(m=>new Option(m,m)));setAiSetup(r.models.length?`${r.models.length}個: ${r.models.slice(0,8).join(', ')}${r.models.length>8?' …':''}（モデル欄で選べる）`:'モデルがありません（ローカルならモデルを読み込んでね）',r.models.length?'good':'warning')}catch(e){setAiSetup(e.message,'warning')}};
+doc('aiTest').onclick=async()=>{setAiSetup(`${AI_NAMES[aiCfg.provider]} に聞いています…`);try{const r=await api('/api/ai/ask',{method:'POST',body:JSON.stringify({system:'短く答えてください。',prompt:'「つながりました」とだけ返してください。'})});setAiSetup(`返事: ${r.text.trim().slice(0,80)}（${r.model} · ${r.seconds}秒）`,'good')}catch(e){setAiSetup('つながりません: '+e.message,'warning')}};
+
+// What the AI sees: a header, the current overrides and one row per tap onset in the chosen range
+function aiRange(scope){if(scope==='near'){const v=t-offsetMs;return [v-20000,v+20000]}return [chartStartV===null?-Infinity:chartStartV-1500,chartEndV===null?Infinity:chartEndV+1500]}
+function beatPos(v){const b=beatLen();if(!b)return '';const q=(v-beatOrigin())/b,bar=Math.floor(q/beatsPerBar);return `${bar+1}:${(q-bar*beatsPerBar+1).toFixed(2)}`}
+function aiContext(scope){
+  const info=tapInfo(),b=beatLen(),on=data.onsets,[lo,hi]=aiRange(scope),rows=[],dv=[];
+  for(let k=0;k<on.length;k++){const o=on[k],v=Math.round(o.start-offsetMs);if(v<lo||v>hi)continue;
+    const i=o.taps[0],p=data.strokes[i][3][0],len=Math.max(...o.taps.map(j=>data.lens[j])),d=info.dev[i];if(Number.isFinite(d))dv.push(d);
+    rows.push([k+1,v,beatPos(v),k?Math.round(o.start-on[k-1].start):'',o.taps.length,len,Math.round(p[1]/2),Math.round(p[2]/2),Number.isFinite(d)?'1/'+info.div[i]*4:'',Number.isFinite(d)?Math.round(d):'',info.run[i],info.num[i]||''].join(','))}
+  const w=+doc('judgeWin').value||25,c=[0,0,0];for(const d of dv)c[judgeOf(d)]++;const mean=dv.length?dv.reduce((a,x)=>a+x,0)/dv.length:0;
+  const head=[`曲（データ名）: ${data.name}`,b?`BPM ${bpm} · ${beatsPerBar}拍子 · 1小節目の頭 = 動画 ${Math.round(beatOrigin())}ms`:'BPM: 未設定（音価とずれは無し。間隔 ioi で判断して）',
+    `譜面の開始 = 動画 ${chartStartV??'未設定'}ms · 終了 = ${chartEndV??'未設定'}ms · 今の位置 = 動画 ${Math.round(t-offsetMs)}ms（${beatPos(t-offsetMs)||'—'}）`,
+    `判定の幅 ±${w}ms · 自動の音価: ${doc('snapDiv').value==='auto'?'自動':'1/'+doc('snapDiv').value+'に固定'}`,
+    dv.length?`この範囲の判定: 緑 ${c[0]} · 早い ${c[1]} · 遅い ${c[2]} · 平均 ${Math.round(mean)}ms`:'',
+    `いまのAIの調整: ${JSON.stringify(tapPlan)}`,'',
+    '列: n=タップ開始の番号（同時押しは1つ）, t=動画の時刻ms, pos=小節:拍（1始まり。小数は拍の中の位置）, ioi=前のタップ開始からのms, f=同時に触れた指の数, len=一番長い接触のms（150以上はホールドやアークの可能性）, x,y=最初の指の位置（iPadの座標 横0-1194・縦0-834、x<597は左半分）, div=いま判定に使っている音価, dev=その線からのずれms（+は遅い）, run=いまの連打のまとまりの番号, cnt=まとまりの中での番号',
+    'n,t,pos,ioi,f,len,x,y,div,dev,run,cnt'];
+  return {text:head.filter((l,i)=>l||i>5).join('\n')+'\n'+rows.join('\n'),rows:rows.length,lo,hi};
+}
+function updateAiSize(){if(doc('aiControls').classList.contains('hidden'))return;const c=aiContext(doc('aiScope').value);doc('aiSize').textContent=`${c.rows}打 · 約${Math.max(1,Math.round(c.text.length/1000))}千文字`+(c.text.length>30000&&['lmstudio','ollama'].includes(aiCfg?.provider)?'（ローカルAIには多すぎるかも。前後20秒がおすすめ）':'')}
+doc('aiScope').onchange=updateAiSize;doc('aiPanel').addEventListener('pointerenter',updateAiSize);
+
+const AI_SYSTEM='あなたはリズムゲームArcaeaのプレイ解析を手伝うアシスタントです。データはiPadのタッチ記録をプレイ動画と同期したもので、譜面データそのものはありません。ノーツの時刻はBPMと小節の頭から引いた線で推定しています。日本語で答えてください。ファイルの読み書きやコマンドの実行はせず、渡したデータだけで答えてください。';
+const AI_TASK={
+  adjust:`目的: 自動の判定が苦手な次の3つを、区間ごとに判断して上書きする。
+1. snap（区間ごとの音価 div）: その区間のノーツが何分の配置か（4, 8, 12, 16, 24, 32 のどれか）。ずれ(ms)を測る線の細かさになる。自動は連打のまとまりの間隔から推定しているので、3連符と16分の取り違えや、ゆっくりした区間で細かすぎる線に寄せてずれを小さく見せることがある。各区間の pos の小数（.25/.50/.75 なら16分系、.33/.67 なら3連系）とずれ dev の偏りから判断する。
+2. runs（連打のまとまり）: 画面にタップ回数 1, 2, 3… を出す単位。トリル・連打・階段など、プレイヤーが「ひと続き」と感じる範囲。自動は「一定以上空いたら区切る」だけなので、ゆっくりした譜面では数えられず、同じ間隔のまま別のフレーズが続く所ではずっと数え続けてしまう。フレーズの切れ目（小節の頭、リズムの変化、指の位置 x,y や左右の手の切り替わり）で区切る。
+3. no_count: 数える意味のない範囲（ゆっくりした単発の連続、ホールドやアークが中心の所など）。
+ルール: 自動のままで良い所は書かない（書いた区間だけが上書きされる）。時刻は表の t の値を使い、from_ms は区間の最初のタップの t、to_ms は最後のタップの t にする。同じ種類の区間どうしは重ねない。
+出力は次の形のJSONだけにする（前後の説明文やコードブロックは不要）:
+{"snap":[{"from_ms":0,"to_ms":0,"div":16,"reason":"短い理由"}],"runs":[{"from_ms":0,"to_ms":0,"reason":"短い理由"}],"no_count":[{"from_ms":0,"to_ms":0,"reason":"短い理由"}],"notes":"全体の所見を1〜3文"}`,
+  advice:`目的: プレイヤーへの練習アドバイス。ずれ dev（判定）、指の位置 x,y（左右の手）、接触の長さ len（ホールド・アークの離しの早さ遅さ）、連打のまとまりを合わせて、傾向と具体的な練習方法を5点前後で挙げる。各点に小節の位置（pos）を添える。データから言えることと推測を分けて書く。BPMが無い場合はタップの間隔 ioi で判断する。`,
+};
+function aiBusyUI(on,label){aiBusy=on;for(const id of ['aiAdjust','aiAdvice','aiAsk','aiTest'])doc(id).disabled=on;clearInterval(aiBusyUI.timer);if(on){const t0=performance.now(),tick=()=>showMsg('aiStatus',`${label}…（${Math.round((performance.now()-t0)/1000)}秒。CLIは数十秒〜数分かかることがある）`);tick();aiBusyUI.timer=setInterval(tick,1000)}}
+async function aiRun(mode,question){
+  if(aiBusy)return;if(!data.onsets.length){showMsg('aiStatus','タッチデータがありません。','warning');return}
+  const scope=doc('aiScope').value,ctx=aiContext(scope);if(!ctx.rows){showMsg('aiStatus','この範囲にタップがありません。範囲を変えるか、譜面の開始・終了を決めてね。','warning');return}
+  const task=mode==='ask'?`次の質問に、データに基づいて答える: ${question}`:AI_TASK[mode];
+  aiBusyUI(true,`${AI_NAMES[aiCfg.provider]} に${mode==='adjust'?'配置と連打を判断してもらっています':mode==='advice'?'アドバイスを頼んでいます':'聞いています'}`);
+  try{
+    const r=await api('/api/ai/ask',{method:'POST',body:JSON.stringify({system:AI_SYSTEM,prompt:`${task}\n\n---- データ ----\n${ctx.text}`})});
+    const meta=`${AI_NAMES[r.provider]} · ${r.model} · ${r.seconds}秒 · ${ctx.rows}打`;
+    if(mode==='adjust'){const prop=parsePlan(r.text);if(!prop){showAnswer(r.text);showMsg('aiStatus',`返事から調整を読み取れませんでした（${meta}）。返事をそのまま出します。`,'warning');return}aiPending={plan:prop,lo:ctx.lo,hi:ctx.hi,notes:prop.notes};renderProposal();showMsg('aiStatus',`調整の提案が届きました（${meta}）。中身を見て「この調整を使う」で反映。`,'good')}
+    else{showAnswer(r.text);showMsg('aiStatus',`返事が届きました（${meta}）。`,'good')}
+  }catch(e){showMsg('aiStatus','AIに聞けませんでした: '+e.message,'warning')}
+  finally{aiBusyUI(false)}
+}
+// The reply should be bare JSON, but models like to wrap it in prose or a code fence
+function parsePlan(text){const a=text.indexOf('{'),b=text.lastIndexOf('}');if(a<0||b<=a)return null;try{const j=JSON.parse(text.slice(a,b+1)),p=normPlan(j);return {...p,notes:String(j.notes||'').slice(0,600)}}catch(e){return null}}
+function showAnswer(text){const el=doc('aiAnswer');el.textContent=text.trim();el.classList.remove('hidden');doc('aiProposal').classList.add('hidden')}
+const fmtRange=r=>{const b=beatLen();return b?`${beatPos(r.from)}〜${beatPos(r.to)}`:`${(r.from/1000).toFixed(2)}〜${(r.to/1000).toFixed(2)}秒`};
+function planList(title,list,fmt){if(!list.length)return '';return `<h4>${title}（${list.length}）</h4><ul>`+list.map(r=>`<li>${fmt(r)} <span class="why">${escapeHtml(r.reason)}</span></li>`).join('')+'</ul>'}
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderProposal(){
+  const el=doc('aiProposal'),p=aiPending.plan,none=!p.snap.length&&!p.runs.length&&!p.noCount.length;
+  el.innerHTML=(aiPending.notes?`<h4>所見</h4><div>${escapeHtml(aiPending.notes)}</div>`:'')+
+    planList('区間ごとの音価',p.snap,r=>`${fmtRange(r)} → <b>1/${r.div}</b>`)+planList('連打のまとまり',p.runs,r=>`${fmtRange(r)}`)+planList('数えない範囲',p.noCount,r=>`${fmtRange(r)}`)+
+    (none?'<div>上書きの提案はありません（自動のままで良いという判断）。</div>':'')+
+    `<div class="line" style="margin-top:8px"><button id="aiPropApply" class="primary">この調整を使う</button><button id="aiPropDrop" class="quiet">使わない</button><span class="small sub">AIに渡した範囲（${aiPending.lo===-Infinity?'最初':fmtRange({from:aiPending.lo,to:aiPending.lo}).split('〜')[0]}〜）の今の調整は置き換わる</span></div>`;
+  el.classList.remove('hidden');doc('aiAnswer').classList.add('hidden');
+  doc('aiPropApply').onclick=()=>{const {plan,lo,hi}=aiPending,keep=list=>list.filter(r=>r.to<lo||r.from>hi);
+    setTapPlan({snap:[...keep(tapPlan.snap),...plan.snap],runs:[...keep(tapPlan.runs),...plan.runs],noCount:[...keep(tapPlan.noCount),...plan.noCount]});
+    aiPending=null;el.classList.add('hidden');showMsg('aiStatus','AIの調整を反映しました。判定の色・ms と連打の番号が変わる。','good')};
+  doc('aiPropDrop').onclick=()=>{aiPending=null;el.classList.add('hidden');showMsg('aiStatus','提案は使いませんでした。')};
+}
+function renderPlan(){
+  const n=tapPlan.snap.length+tapPlan.runs.length+tapPlan.noCount.length,el=doc('aiPlanInfo');
+  el.textContent=n?`区間ごとの音価 ${tapPlan.snap.length} · 連打のまとまり ${tapPlan.runs.length} · 数えない範囲 ${tapPlan.noCount.length}（それ以外は自動）`:'なし（すべて自動の判定）';el.className='status'+(n?' good':'');
+  doc('aiPlanClear').disabled=!n;if(document.activeElement!==doc('aiPlanJson'))doc('aiPlanJson').value=JSON.stringify(tapPlan,null,1);
+}
+doc('aiAdjust').onclick=()=>aiRun('adjust');doc('aiAdvice').onclick=()=>aiRun('advice');
+doc('aiAsk').onclick=()=>{const q=doc('aiQuestion').value.trim();if(q)aiRun('ask',q);else doc('aiQuestion').focus()};
+doc('aiQuestion').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing)doc('aiAsk').click()});
+doc('aiPlanClear').onclick=()=>{setTapPlan(null);showMsg('aiStatus','AIの調整を消しました（すべて自動の判定）。')};
+doc('aiPlanApply').onclick=()=>{try{setTapPlan(JSON.parse(doc('aiPlanJson').value||'{}'));showMsg('aiStatus','調整を書き換えました。','good')}catch(e){showMsg('aiStatus','JSONとして読めません: '+e.message,'warning')}};
+
+// ---------- tool dock: one task page at a time beside the video ----------
+const DOCK_TABS=['prep','sync','view','song','taps','ai','export','help'];
+let dockTab='prep',dockKey='';
+function setDock(tab,save=true){
+  if(!DOCK_TABS.includes(tab))return;dockTab=tab;doc('dock').classList.remove('min');document.body.classList.remove('dock-min');
+  for(const b of document.querySelectorAll('#dockTabs button'))b.classList.toggle('selected',b.dataset.tab===tab);
+  for(const pg of document.querySelectorAll('.dock-page'))pg.classList.toggle('on',pg.dataset.page===tab);
+  doc('dockBody').scrollTop=0;if(tab==='ai')updateAiSize();dockKey='';updateDock();if(save)persist();
+}
+const narrow=()=>matchMedia('(max-width:1100px)').matches;
+// In the narrow layout the open tab folds the sheet away (and any tab opens it again)
+for(const b of document.querySelectorAll('#dockTabs button'))b.onclick=()=>{const fold=narrow()&&b.dataset.tab===dockTab&&!doc('dock').classList.contains('min');doc('dock').classList.toggle('min',fold);document.body.classList.toggle('dock-min',fold);if(!fold)setDock(b.dataset.tab);draw()};
+// The next thing the work needs (video, chart start, BPM); clicking it opens the page that does it
+function nextStep(){
+  if(!mediaExists())return ['prep','次は: 動画を読み込む（映像エリアにドラッグ＆ドロップでもOK）'];
+  if(chartStartV===null)return ['sync','次は: 譜面の開始を決める（映像のすぐ下の同期バーで「ここが譜面の開始」）'];
+  if(!bpm)return ['song','次は: BPMを入れる（判定の色と連打の数が出る）'];
+  return null;
+}
+function dockBadge(tab,text,kind=''){const el=doc('tb-'+tab);el.textContent=text||'';el.className='badge'+(kind?' '+kind:'')+(text?'':' hidden')}
+// Runs every draw; touches the page only when something shown changed
+function updateDock(){
+  const n=nextStep(),rec=REC_BUSY.includes(recState),exp=exporting?Math.round(parseFloat(doc('exportProg').style.width)||0):null;
+  const key=[dockTab,n?.[1],rec,recState,chartStartV!==null,bpm,aiBusy,!!aiPending,exp].join('|');if(key===dockKey)return;dockKey=key;
+  const el=doc('dockNext');el.classList.toggle('hidden',!n||n[0]===dockTab&&n[0]!=='sync');if(n){el.textContent=n[1];el.dataset.tab=n[0]}
+  dockBadge('prep',rec?(recState==='recording'?'REC':'接続中'):'',rec?'rec':'');
+  dockBadge('sync',chartStartV!==null?'✓':'',chartStartV!==null?'ok':'');
+  dockBadge('song',bpm?String(bpm):'');
+  dockBadge('ai',aiBusy?'…':aiPending&&dockTab!=='ai'?'提案':'',aiBusy||aiPending?'wait':'');
+  dockBadge('export',exp!==null?exp+'%':'',exp!==null?'rec':'');
+}
+doc('dockNext').onclick=e=>{const tab=e.currentTarget.dataset.tab;setDock(tab);if(tab==='sync'){doc('syncBar').scrollIntoView({block:'nearest',behavior:'smooth'});doc('setChartStart').focus()}};
+// Shortcuts into the dock from what is on screen
+doc('recChip').style.cursor='pointer';doc('recChip').onclick=()=>setDock('prep');
+doc('beatClock').closest('.metric').style.cursor='pointer';doc('beatClock').closest('.metric').onclick=()=>setDock('song');
+
 // ---------- keyboard ----------
 function isTyping(el){return !!el&&(el.isContentEditable||el.tagName==='TEXTAREA'||el.tagName==='SELECT'||(el.tagName==='INPUT'&&!['range','checkbox','radio','button'].includes(el.type)))}
 // Shortcuts stay active after clicking a button (Space must not re-press the focused button); other sliders keep their own arrow keys
@@ -1255,9 +1509,10 @@ window.addEventListener('keydown',e=>{
   else if(key==='[')setOffset(syncMs-1);else if(key===']')setOffset(syncMs+1);else if(key==='{')setOffset(syncMs-10);else if(key==='}')setOffset(syncMs+10);
   else if(key==='f'||key==='F')toggleFullscreen();else if(key==='m'||key==='M')doc('muteBtn').click();
   else if(key==='a'||key==='A')setAlignMode(!alignMode);else if(key==='s'||key==='S')doc('tapPickNear').click();else if(key==='p'||key==='P')setPickMode(!pickMode);
+  else if(key>='1'&&key<='8')setDock(DOCK_TABS[+key-1]);
   else if(key==='h'||key==='H')doc('showHints').click();else if(key==='Escape'){if(pickMode)setPickMode(false);else if(alignMode)setAlignMode(false)}
 });
 
 window.addEventListener('resize',draw);
-restoreState();updateLinkUI();updateAnchorsUI();updateBeatInfo();updateLagUI();draw();requestAnimationFrame(frame);recInit();
+restoreState();updateLinkUI();updateAnchorsUI();updateBeatInfo();updateLagUI();draw();setDock(dockTab,false);requestAnimationFrame(frame);recInit();aiInit();
 </script></body></html>
