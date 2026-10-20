@@ -14,7 +14,7 @@ sessions, so the marker is used instead.
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
-import argparse, collections, datetime, json, os, re, subprocess, sys, threading, time, webbrowser
+import argparse, collections, datetime, json, os, re, subprocess, sys, tempfile, threading, time, webbrowser
 
 HERE = Path(__file__).resolve().parent
 # In the repository, captures go next to the other data; in a standalone viewer folder, next to this script
@@ -23,10 +23,36 @@ WORKER = HERE / 'touch_oslog.py'
 READY_MARKER = 'TOUCH_OSLOG_READY'  # printed by touch_oslog.py once the device stream is open
 SUB_RX = re.compile(r'path:\s*\d+;\s*\{[\d.]+,\s*[\d.]+\};\s*(.*?)touchID:\s*(0x[\da-fA-F]+)')
 TOKEN_RX = re.compile(r'Digitizer token:\s*(0x[\da-fA-F]+)')
-NAME_RX = re.compile(r'^touch_\d{8}_\d{6}\.jsonl$')
+# touch_<date>_<time>[_<name>].jsonl: the timestamp keeps the files in recording order, the name is the user's
+NAME_RX = re.compile(r'^touch_(\d{8}_\d{6})(?:_([^\\/:*?"<>|\x00-\x1f]{1,80}))?\.jsonl$')
+TITLE_BAD = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
 # Only these keys are needed downstream (touchlog.py / the viewer); format_string and arguments repeat the message
 KEEP_KEYS = ('timestamp', 'pid', 'subsystem', 'category', 'message')
 CHILD_ENV = dict(os.environ, PYTHONWARNINGS='ignore', PYTHONUNBUFFERED='1', PYTHONIOENCODING='utf-8')
+
+
+def clean_title(title):
+    """A name the user typed, made safe for a Windows file name (or '' for none)."""
+    title = TITLE_BAD.sub('_', str(title or '')).strip()
+    return title.rstrip('. ')[:80].strip()
+
+
+def capture_name(stamp, title):
+    return f'touch_{stamp}' + (f'_{title}' if title else '') + '.jsonl'
+
+
+def rename_capture(path, title):
+    """Rename a finished capture to carry title; returns the new path. Raises ValueError with a message for the user."""
+    m = NAME_RX.match(path.name)
+    if not m or not path.is_file():
+        raise ValueError('ファイルが見つかりません')
+    new = path.with_name(capture_name(m.group(1), clean_title(title)))
+    if new == path:
+        return path
+    if new.exists():
+        raise ValueError(f'{new.name} は既にあります')
+    path.rename(new)
+    return new
 
 
 def pmd3(*args):
@@ -48,6 +74,7 @@ class Capture:
         self.out = None
         self.file = None
         self.error = ''
+        self.title = ''
         self.stderr_tail = collections.deque(maxlen=12)
         self._reset_stats()
 
@@ -68,7 +95,7 @@ class Capture:
         with self.lock:
             now = time.time()
             return {
-                'state': self.state, 'file': self.file.name if self.file else None, 'error': self.error,
+                'state': self.state, 'file': self.file.name if self.file else None, 'title': self.title, 'error': self.error,
                 'elapsed': round(now - self.started_at, 1) if self.started_at and self.state != 'idle' else None,
                 'live': self.live_at is not None, 'lines': self.lines, 'records': self.records,
                 'contacts': self.contacts, 'active': len(self.active), 'tokens': dict(self.tokens),
@@ -76,7 +103,7 @@ class Capture:
                 'stderr': list(self.stderr_tail)[-4:],
             }
 
-    def start(self):
+    def start(self, title=''):
         with self.lock:
             if self.state in ('connecting', 'recording', 'stopping'):
                 return False, '既に記録中です'
@@ -84,11 +111,20 @@ class Capture:
             self._reset_stats()
             self.error = ''
             self.stderr_tail.clear()
-            self.file = CAPTURE_DIR / datetime.datetime.now().strftime('touch_%Y%m%d_%H%M%S.jsonl')
+            self.title = clean_title(title)
+            self.file = CAPTURE_DIR / capture_name(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'), self.title)
             self.out = open(self.file, 'w', encoding='utf-8', newline='\n')
             self.started_at = time.time()
             self.state = 'connecting'
         threading.Thread(target=self._run, daemon=True).start()
+        return True, ''
+
+    def set_title(self, title):
+        """Name the recording in progress. The open file cannot be renamed on Windows, so it is renamed on close."""
+        with self.lock:
+            if self.state not in ('connecting', 'recording', 'stopping'):
+                return False, '記録していません'
+            self.title = clean_title(title)
         return True, ''
 
     def stop(self):
@@ -227,9 +263,38 @@ class Capture:
                 except OSError:
                     pass
                 self.file = None
+            elif self.file and self.file.exists():
+                try:
+                    self.file = rename_capture(self.file, self.title)
+                except (ValueError, OSError) as e:
+                    self.error = self.error or f'名前を付けられませんでした（{e}）。{self.file.name} のまま保存しています'
 
 
 capture = Capture()
+screenshot_lock = threading.Lock()
+
+
+def device_screenshot():
+    """PNG of the iPad's screen (developer mode, like the recording). Returns (png bytes, error message)."""
+    if not screenshot_lock.acquire(blocking=False):
+        return None, '前のスクリーンショットを撮っています'
+    fd, tmp = tempfile.mkstemp(suffix='.png')
+    os.close(fd)
+    try:
+        r = subprocess.run(pmd3('developer', 'dvt', 'screenshot', tmp), capture_output=True, env=CHILD_ENV, timeout=60)
+        data = Path(tmp).read_bytes() if r.returncode == 0 else b''
+        if not data:
+            lines = [clean_stderr(l) for l in r.stderr.decode('utf-8', 'replace').splitlines()]
+            return None, ([l for l in lines if l] or [f'exit {r.returncode}'])[-1]
+        return data, ''
+    except subprocess.TimeoutExpired:
+        return None, '60秒で撮れませんでした'
+    finally:
+        screenshot_lock.release()
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
 device_cache = {'at': 0, 'value': None}
 
 
@@ -289,6 +354,17 @@ class Handler(SimpleHTTPRequestHandler):
             return self._json(capture.status())
         if url.path == '/api/device':
             return self._json(device_info())
+        if url.path == '/api/device/screenshot':
+            png, err = device_screenshot()
+            if not png:
+                return self._json({'error': err}, 503)
+            self.send_response(200)
+            self.send_header('Content-Type', 'image/png')
+            self.send_header('Cache-Control', 'no-store')
+            self.send_header('Content-Length', str(len(png)))
+            self.end_headers()
+            self.wfile.write(png)
+            return
         if url.path == '/api/captures':
             return self._json({'dir': str(CAPTURE_DIR), 'files': list_captures()})
         if url.path == '/api/captures/file':
@@ -309,8 +385,30 @@ class Handler(SimpleHTTPRequestHandler):
         url = urlparse(self.path)
         if not self._api_allowed():
             return self._json({'error': 'forbidden'}, 403)
+        try:
+            n = int(self.headers.get('Content-Length') or 0)
+            body = json.loads(self.rfile.read(n).decode('utf-8')) if n else {}
+            if not isinstance(body, dict):
+                body = {}
+        except ValueError:
+            return self._json({'error': 'bad request'}, 400)
+        if url.path == '/api/captures/rename':
+            name = str(body.get('name') or '')
+            if not NAME_RX.match(name):
+                return self._json({'error': 'ファイル名が正しくありません'}, 400)
+            # The file being recorded is still open: name it through the capture instead
+            if capture.status()['file'] == name and capture.status()['state'] in ('connecting', 'recording', 'stopping'):
+                ok, msg = capture.set_title(body.get('title'))
+                return self._json({'ok': ok, 'error': msg, 'name': name, 'pending': True}, 200 if ok else 409)
+            try:
+                new = rename_capture(CAPTURE_DIR / name, body.get('title'))
+            except (ValueError, OSError) as e:
+                return self._json({'ok': False, 'error': str(e)}, 409)
+            return self._json({'ok': True, 'name': new.name})
         if url.path == '/api/capture/start':
-            ok, msg = capture.start()
+            ok, msg = capture.start(body.get('title'))
+        elif url.path == '/api/capture/title':
+            ok, msg = capture.set_title(body.get('title'))
         elif url.path == '/api/capture/stop':
             ok, msg = capture.stop()
         else:
